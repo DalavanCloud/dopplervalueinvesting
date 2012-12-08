@@ -1,3 +1,10 @@
+*.csv#
+screen-downloads/*
+screen-output/*
+screen-input/companylist-amex.csv
+screen-input/companylist-nasdaq.csv
+screen-input/companylist-nyse.csv
+
 *.py[cod]
 
 # C extensions
