@@ -23,6 +23,7 @@ import urllib2
 import time, random
 import socket
 import urllib
+import lxml
 import lxml.html
 import re
 import math
