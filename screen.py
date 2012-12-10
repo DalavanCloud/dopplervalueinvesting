@@ -1052,6 +1052,7 @@ for symbol in list_symbol:
 
 i_stock = 0
 i_stock_max = len (list_symbol) -1
+create_dir (dir_output) # Create output directory if it does not already exist
 filename_output = dir_output + "/results-unfiltered.csv"
 
 with open(filename_output, 'w') as csvfile:
@@ -1162,7 +1163,6 @@ def percent_tenth (num_input):
 
 i_stock = 0
 i_stock_max = len (list_symbol) -1
-create_dir (dir_output) # Create output directory if it does not already exist
 filename_output = dir_output + "/results.csv"
 
 with open(filename_output, 'w') as csvfile:
