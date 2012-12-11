@@ -1,4 +1,11 @@
-dopplervalueinvesting
-=====================
+DEVELOPMENT SETUP PROCEDURE
+1.  Install Linux Mint Debian Edition or a similar Linux distro.
+2.  Install and set up Git.
+3.  Install lxml with the command "sudo apt-get install python-lxml".
+4.  To download the Git repository, enter the following commands:
+cd
+git clone https://github.com/jhsu802701/dopplervalueinvesting.git
+5.  Now the Doppler Value Investing repository is available locally at ~/dopplervalueinvesting .
 
-Source code for the Doppler Value Investing stock screen and detailed analysis tool
+RUNNING THE DOPPLER VALUE INVESTING SCREENING SCRIPT
+From the ~/dopplervalueinvesting directory, just enter "python screen.py"
