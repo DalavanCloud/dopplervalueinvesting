@@ -1,7 +1,8 @@
 #!/bin/bash
 # Proper header for a Bash script.
 
-# This is the script called by cron on the remote server.
+# This is the script called by cron on the remote server.  
+# This script is NOT intended for use in the development environment.
 
-nice -n10 ionice -c2 -n5 python $HOME/webapps/scripts_doppler/dopplervalueinvesting/delay.py | tee $HOME/logs/user/delay.txt
-nice -n10 ionice -c2 -n5 python $HOME/webapps/scripts_doppler/dopplervalueinvesting/screen.py | tee $HOME/logs/user/screen.txt
+python $HOME/webapps/scripts_doppler/dopplervalueinvesting/delay.py
+python $HOME/webapps/scripts_doppler/dopplervalueinvesting/screen.py
