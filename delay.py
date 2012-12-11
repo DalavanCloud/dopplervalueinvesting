@@ -10,4 +10,4 @@ def delay_min (n_minutes):
     print "Delay of " + str(n_minutes) + " minutes"
     time.sleep (random.uniform (0, n_sec))
 
-delay_min (30)
+delay_min (1)
