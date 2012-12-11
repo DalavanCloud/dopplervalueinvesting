@@ -1,0 +1,16 @@
+Cron is used to automatically run the Doppler Value Investing scripts at regular intervals.
+
+The path for Python 2.7 MUST be specified for cron.
+
+The screen output of running the script is saved at /home/doppler/logs/user/screen.txt .
+
+The nice command is used to ensure that the script does not drag down server performance.
+
+The script runs at 5:01 AM UTC time (1:01 AM EDT, 12:01 AM CDT, 12:01 AM EST, 11:01 PM CST).
+
+The screen-downloads directory is deleted at 4:01 AM UTC time each Saturday to ensure the latest financial data from
+Smartmoney and Yahoo Finance.
+
+CRON COMMANDS:
+01 05 * * * nice -n10 ionice -c2 -n5 /usr/local/bin/python2.7 /home/doppler/webapps/scripts_doppler/dopplervalueinvesting/screen.py >> /home/doppler/logs/user/screen.txt
+01 04 * * 6 nice -n10 ionice -c2 -n5 rm -r /home/doppler/webapps/scripts_doppler/dopplervalueinvesting/screen-downloads
