@@ -485,7 +485,7 @@ list_industry = Exchange1.industry_selected ()
 # END: this section is for testing purposes
 
 # BEGIN: enable this section for analyzing all AMEX, NYSE, and NASDAQ stocks
-"""
+
 Exchange1 = Exchange ('amex')
 Exchange2 = Exchange ('nasdaq')
 Exchange3 = Exchange ('nyse')
@@ -496,7 +496,7 @@ list_price = Exchange1.price_selected () + Exchange2.price_selected () + Exchang
 list_nshares = Exchange1.nshares_selected () + Exchange2.nshares_selected () + Exchange3.nshares_selected ()
 list_sector = Exchange1.sector_selected () + Exchange2.sector_selected () + Exchange3.sector_selected ()
 list_industry = Exchange1.industry_selected () + Exchange2.industry_selected () + Exchange3.industry_selected ()
-"""
+
 # END: enable this section for analyzing all AMEX, NYSE, and NASDAQ stocks
 
 num_stocks = len (list_symbol)
