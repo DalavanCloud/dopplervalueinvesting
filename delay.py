@@ -5,9 +5,10 @@
 
 import time, random
 
-def delay_min (n_minutes):
-    n_sec = n_minutes * 60
-    print "Delay of " + str(n_minutes) + " minutes"
+def delay_min (n_minutes_max):
+    n_sec_max = n_minutes * 60
+    n_sec = random.uniform (0, n_sec)
+    print "Delay (minutes): " + str(n_sec/60)
     time.sleep (random.uniform (0, n_sec))
 
-delay_min (1)
+delay_min (0)
