@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/python
 
 # Welcome to the Dopeler Value Investing pre-screening tool.
 # Yes, the name Dopeler is inspired by the movie _Snow Day_.
