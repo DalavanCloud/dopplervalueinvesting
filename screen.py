@@ -14,6 +14,7 @@
 # Some may be the beneficiaries of a temporary fad.
 # In addition, there may be other problems with some of these stocks.
 
+import pwd
 import sys
 import os
 import csv
@@ -28,13 +29,46 @@ import lxml.html
 import re
 import math
 
-dir_screen = os.getcwd()
+##########################################################################################
+# PART 1: FIGURE OUT THE DIRECTORY STRUCTURE
+# THIS IS NEEDED TO DISTINGUISH BETWEEN THE DEVELOPMENT ENVIRONMENT AND SERVER ENVIRONMENT
+# THIS DETERMINES THE PATH TO CRITICAL DIRECTORIES AND FILES
+##########################################################################################
+
+# Assume that this is the server environment
+dir_home = '/home/doppler' # Home directory on server
+dir_screen = dir_home + '/webapps/scripts_doppler/dopplervalueinvesting'
+
+# Check this assumption
+is_server = os.path.exists(dir_home) # Determine if this is the server environment
+
+# Adjustments to make if this is the development environment instead of the server environment
+if not (is_server):
+    # Get your username (not root)
+    uname=pwd.getpwuid(1000)[0]
+    dir_home = '/home/' + uname
+    dir_screen = dir_home + '/dopplervalueinvesting'
+
+# Determine the paths of critical directories
 dir_input = dir_screen + '/screen-input'
 dir_downloads = dir_screen + '/screen-downloads'
-dir_output = dir_screen + '/screen-output'
+dir_output = dir_screen + '/screen-output'  
+
+################################################
+# PART 2: RANDOM DELAY (SERVER ENVIRONMENT ONLY)
+################################################
+def delay_min (n_minutes_max):
+    n_sec_max = n_minutes_max * 60
+    n_sec = random.uniform (0, n_sec_max)
+    n_minutes = n_sec/60
+    print "Delay (minutes): " + str(n_minutes)
+    time.sleep (random.uniform (0, n_sec))
+
+if (is_server):
+    delay_min (0)
 
 ######################################################################################
-# PART 1: DOWNLOAD THE LISTS OF AMEX, NYSE, AND NASDAQ STOCKS FROM THE NASDAQ WEB SITE
+# PART 3: DOWNLOAD THE LISTS OF AMEX, NYSE, AND NASDAQ STOCKS FROM THE NASDAQ WEB SITE
 ######################################################################################
 
 # Get age of file
@@ -121,7 +155,7 @@ print ('Downloading list of NASDAQ stocks')
 download_page (url3, file3, file_age_max_hours)
 
 ##############################################################################################
-# PART 2: For a given exchange, obtain a list of ticker symbols for stocks that are NOT funds.
+# PART 4: For a given exchange, obtain a list of ticker symbols for stocks that are NOT funds.
 ##############################################################################################
 
 # Purpose: extract a given column from a 2-D list
@@ -433,7 +467,7 @@ class Exchange:
         return list_output
 
 #######################################################################################################################
-# PART 3: Using Exchange.symbol_selected, compile the list of ticker symbols from the AMEX, NYSE, and NASDAQ exchanges.
+# PART 5: Using Exchange.symbol_selected, compile the list of ticker symbols from the AMEX, NYSE, and NASDAQ exchanges.
 #######################################################################################################################
 print "******************************"
 print "BEGIN acquiring list of stocks"
@@ -471,7 +505,7 @@ print "FINISHED acquiring list of stocks"
 print "*********************************"
 
 ############################################################
-# PART 4: For each stock, download the financial data needed
+# PART 6: For each stock, download the financial data needed
 ############################################################
 # NOTE: Downloading is bypassed if the file to be replaced is less than 4 days old.  
 # NOTE: Delay is used to avoid overwhelming the servers.
@@ -592,7 +626,7 @@ for symbol in list_symbol:
 
     
 ###############################################################
-# PART 5: For each stock, process the financial data downloaded
+# PART 7: For each stock, process the financial data downloaded
 ###############################################################
 
 # Purpose: Remove the HTML tags, commas, and spaces from an element in a list; used for processing financial data
@@ -1048,7 +1082,7 @@ for symbol in list_symbol:
     print "Analysis completion: " + str(i_stock) + '/' + str(i_stock_max) + "; Minutes remaining: " + str(remain_m)
 
 ######################################################
-# PART 6: PRINT THE RESULTS (UNFILTERED) TO A CSV FILE
+# PART 7: PRINT THE RESULTS (UNFILTERED) TO A CSV FILE
 ######################################################
 
 i_stock = 0
@@ -1112,7 +1146,7 @@ with open(filename_output, 'w') as csvfile:
         i_stock = i_stock + 1
     
 ####################################################
-# PART 6: PRINT THE RESULTS (FILTERED) TO A CSV FILE
+# PART 8: PRINT THE RESULTS (FILTERED) TO A CSV FILE
 ####################################################
 # Exclude the following in the filtered results:
 # "N/A" for every quantitative parameter

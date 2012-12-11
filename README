@@ -1,5 +1,5 @@
 DEVELOPMENT SETUP PROCEDURE
-1.  Install Linux Mint Debian Edition or a similar Linux distro.
+1.  Install Linux Mint Debian Edition or a similar Linux distro.  NOTE: Do NOT use 'doppler' as your username.
 2.  Install and set up Git.
 3.  Install lxml with the command "sudo apt-get install python-lxml".
 4.  To download the Git repository, enter the following commands:
