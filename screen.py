@@ -668,6 +668,69 @@ def get_units (string_html):
     else:
         return None
 
+# Purpose: Determine the dB value of a positive number
+# Input: number
+# Output: number
+def db (num_input):
+    num_output = 0
+    try:
+        num_output = 10 * math.log10 (num_input)
+    except:
+        num_output = None
+    return num_output
+    
+# Purpose: Determine the average of a list of numbers
+# Input: list of numbers
+# Output: number
+def ave (list_input):
+    num_output = 0
+    try:
+        num_output = sum (list_input) / len (list_input)
+    except:
+        num_output = None
+    return num_output
+
+# Purpose: Get the square of a number
+def square (num_input):
+    num_output = 0
+    try:
+        num_output = math.pow (num_input, 2)
+    except:
+        num_output = None
+    return num_output
+
+# Purpose: Determine the sample variance of a list of numbers
+# Input: list of numbers
+# Output: number
+def variance (list_input):
+    num_output = 0
+    try:
+        num_ave = ave (list_input)
+        sum_squared_dev = 0
+        n_length = len (list_input)
+        i_max = n_length - 1
+        i = 0
+        while i <= i_max:
+            n = list_input [i]
+            squared_dev = square (n - num_ave)
+            sum_squared_dev = sum_squared_dev + squared_dev
+            i = i + 1
+        num_output = sum_squared_dev / (n_length - 1)
+    except:
+        num_output = None
+    return num_output
+
+# Purpose: Determine the sample standard deviation of a list of numbers
+# Input: list of numbers
+# Output: number
+def std_dev (list_input):
+    num_output = 0
+    try:
+        num_output = math.sqrt (variance (list_input))
+    except:
+        num_output = None
+    return num_output
+
 list_roe_ave = []
 list_roe0 = []
 list_roe1 = []
@@ -676,6 +739,9 @@ list_roe3 = []
 list_eps = []
 list_netliq_ps = []
 list_intrinsic_ps = []
+list_pe = []
+list_yield = []
+list_pb = []
 list_assets_smartmoney = []
 list_assets_yahoo = []
 list_assets_ratio = []
@@ -683,9 +749,10 @@ list_rev_smartmoney = []
 list_rev_yahoo = []
 list_rev_ratio = []
 list_diff_db = []
-list_pe = []
-list_yield = []
-list_pb = []
+list_ppe_growth = []
+list_ppe_growth_dev = []
+list_ppe_suspect = []
+
 i_stock = 0
 i_stock_max = len (list_symbol)
 start = time.time ()
@@ -933,68 +1000,13 @@ for symbol in list_symbol:
     try:
         roe_ave = (roe0 + roe1 + roe2 + roe3)/4
     except:
-        try:
-            roe_ave = (roe0 + roe1 + roe2)/3
-        except:
-            try:
-                roe_ave = (roe0 + roe1)/2
-            except:
-                try:
-                    roe_ave = roe0
-                except:
-                    roe_ave = None
+        roe_ave = None
                 
     list_roe_ave.append (roe_ave)
     list_roe0.append (roe0)
     list_roe1.append (roe1)
     list_roe2.append (roe2)
     list_roe3.append (roe3)
-
-    assets0 = 0
-    try:
-        assets0 = list_assets[0] * units_balancesheet / 1E9
-    except:
-        assets0 = None
-    list_assets_smartmoney.append (assets0)
-
-    assets0_alt = 0
-    try:
-        assets0_alt = list_assets_alt[0] * units_balancesheet_alt / 1E9
-    except:
-        assets0_alt = None
-    list_assets_yahoo.append (assets0_alt)
-
-    assets_ratio = 0
-    try:
-        assets_ratio = 10 * math.log10 (assets0 / assets0_alt) # dB
-    except:
-        assets_ratio = None
-    list_assets_ratio.append (assets_ratio)
-
-    rev0 = 0
-    try:
-        rev0 = list_rev[0] * units_income / 1E9
-    except:
-        rev0 = None
-    list_rev_smartmoney.append (rev0)
-
-    rev0_alt = 0
-    try:
-        rev0_alt = list_rev_alt[0] * units_income_alt / 1E9
-    except:
-        rev0_alt = None
-    list_rev_yahoo.append (rev0_alt)
-
-    rev_ratio = 0
-    diff_db = -1000
-    try:
-        rev_ratio = 10 * math.log10 (rev0 / rev0_alt) # dB
-        diff_db = abs (assets_ratio) + abs (rev_ratio) # dB
-    except:
-        rev_ratio = None
-        diff_db = None
-    list_rev_ratio.append (rev_ratio)
-    list_diff_db.append (diff_db)
 
     # this year's projected Dopeler Earnings = last year's PPE * average Dopeler Return On Equity for the last 4 years
     earn = 0
@@ -1073,6 +1085,82 @@ for symbol in list_symbol:
     list_yield.append (yld)
 
 
+    #############################################
+    # SANITY CHECKS: DETERMINE IF DATA IS SUSPECT
+    #############################################
+
+    # Check for asset value difference between Smartmoney and Yahoo Finance
+    assets0 = 0
+    try:
+        assets0 = list_assets[0] * units_balancesheet / 1E9
+    except:
+        assets0 = None
+    list_assets_smartmoney.append (assets0)
+
+    assets0_alt = 0
+    try:
+        assets0_alt = list_assets_alt[0] * units_balancesheet_alt / 1E9
+    except:
+        assets0_alt = None
+    list_assets_yahoo.append (assets0_alt)
+
+    assets_ratio = 0
+    try:
+        assets_ratio = db (assets0 / assets0_alt) # dB
+    except:
+        assets_ratio = None
+    list_assets_ratio.append (assets_ratio)
+
+    # Check for revenue difference between Smartmoney and Yahoo Finance
+    rev0 = 0
+    try:
+        rev0 = list_rev[0] * units_income / 1E9
+    except:
+        rev0 = None
+    list_rev_smartmoney.append (rev0)
+
+    rev0_alt = 0
+    try:
+        rev0_alt = list_rev_alt[0] * units_income_alt / 1E9
+    except:
+        rev0_alt = None
+    list_rev_yahoo.append (rev0_alt)
+
+    rev_ratio = 0
+    diff_db = -1000
+    try:
+        rev_ratio = db (rev0 / rev0_alt) # dB
+        diff_db = abs (assets_ratio) + abs (rev_ratio) # dB
+    except:
+        rev_ratio = None
+        diff_db = None
+    list_rev_ratio.append (rev_ratio)
+    list_diff_db.append (diff_db)
+    
+    ppe0_db = 0
+    ppe1_db = 0
+    ppe2_db = 0
+    ppe3_db = 0
+    ppe_growth = 0
+    ppe_growth_dev = 0
+    ppe_suspect = False
+    try:
+        ppe0_db = db (ppe0/ppe1)
+        ppe1_db = db (ppe1/ppe2)
+        ppe2_db = db (ppe2/ppe3)
+        ppe3_db = db (ppe3/ppe4)
+        ppe_growth = ave ([ppe0_db, ppe1_db, ppe2_db, ppe3_db]) # dB
+        ppe_growth_dev = std_dev ([ppe0_db, ppe1_db, ppe2_db, ppe3_db]) # dB
+        if (ppe_growth_dev > 2): # 2dB or greater is flagrant
+            ppe_suspect = True
+    except:
+        ppe_growth = None
+        ppe_growth_dev = None
+    list_ppe_growth.append (ppe_growth)
+    list_ppe_growth_dev.append (ppe_growth_dev)
+    print ppe0, ppe1, ppe2, ppe3, ppe4
+    print ppe_growth, ppe_growth_dev
+
     i_stock = i_stock + 1
     now = time.time ()
     t_elapsed = now - start
@@ -1111,12 +1199,14 @@ with open(filename_output, 'w') as csvfile:
     h17 = 'Assets\nRatio\n(dB)'
     h18 = 'Revenue\nRatio\n(dB)'
     h19 = 'Total\nDiff.\n(dB)'
-    h20 = 'Dopeler\nROE (Y1)'
-    h21 = 'Dopeler\nROE (Y2)'
-    h22 = 'Dopeler\nROE (Y3)'
-    h23 = 'Dopeler\nROE (Y4)'
+    h20 = 'PPE\nGrowth\n(dB)'
+    h21 = 'PPE\nGrowth\nStd.\nDev\n(dB)'
+    h22 = 'Dopeler\nROE (Y1)'
+    h23 = 'Dopeler\nROE (Y2)'
+    h24 = 'Dopeler\nROE (Y3)'
+    h25 = 'Dopeler\nROE (Y4)'
 
-    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20, h21, h22, h23])
+    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20, h21, h22, h23, h24, h25])
     while i_stock <= i_stock_max:
         c1 = list_symbol [i_stock]
         c2 = list_name [i_stock]
@@ -1137,12 +1227,14 @@ with open(filename_output, 'w') as csvfile:
         c17 = str (list_assets_ratio [i_stock])
         c18 = str (list_rev_ratio [i_stock])
         c19 = str (list_diff_db [i_stock])
-        c20 = str (list_roe0 [i_stock])
-        c21 = str (list_roe1 [i_stock])
-        c22 = str (list_roe2 [i_stock])
-        c23 = str (list_roe3 [i_stock])
+        c20 = str (list_ppe_growth [i_stock])
+        c21 = str (list_ppe_growth_dev [i_stock])
+        c22 = str (list_roe0 [i_stock])
+        c23 = str (list_roe1 [i_stock])
+        c24 = str (list_roe2 [i_stock])
+        c25 = str (list_roe3 [i_stock])
         
-        resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23])
+        resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25])
         i_stock = i_stock + 1
     
 ####################################################
@@ -1250,3 +1342,14 @@ with open(filename_output, 'w') as csvfile:
         
             resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16])
         i_stock = i_stock + 1
+
+###############################################
+# PART 9: COPY THE CSV FILES TO THE DRUPAL SITE
+###############################################
+# dir_home = '/home/doppler' # Home directory on server
+# dir_output = dir_screen + '/screen-output' 
+src = dir_output + '/*'
+dest = dir_home + '/webapps/drup/sites/default/files'
+if (is_server):
+    print "Copying results to the Drupal web site"
+    os.system ('cp ' + src + ' ' + dest)
