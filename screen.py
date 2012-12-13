@@ -1349,7 +1349,7 @@ with open(filename_output, 'w') as csvfile:
 # dir_home = '/home/doppler' # Home directory on server
 # dir_output = dir_screen + '/screen-output' 
 src = dir_output + '/*'
-dest = dir_home + '/webapps/drup/sites/default/files'
+dest = dir_home + '/webapps/drup/sites/default/files/screen-results'
 if (is_server):
     print "Copying results to the Drupal web site"
     os.system ('cp ' + src + ' ' + dest)
