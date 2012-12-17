@@ -54,18 +54,21 @@ dir_input = dir_screen + '/screen-input'
 dir_downloads = dir_screen + '/screen-downloads'
 dir_output = dir_screen + '/screen-output'  
 
-################################################
-# PART 2: RANDOM DELAY (SERVER ENVIRONMENT ONLY)
-################################################
-def delay_min (n_minutes_max):
-    n_sec_max = n_minutes_max * 60
-    n_sec = random.uniform (0, n_sec_max)
-    n_minutes = n_sec/60
-    print "Delay (minutes): " + str(n_minutes)
-    time.sleep (random.uniform (0, n_sec))
-
-if (is_server):
-    delay_min (0)
+###############################################################################
+# PART 2: DECIDE WHETHER TO ANALYZE ALL 5000+ STOCKS OR JUST A SMALL TEST GROUP
+# (DEVELOPMENT ENVIRONMENT ONLY)
+###############################################################################
+run_long = True # By default, run the long version of the script
+if not (is_server): # Offer a choice in the development environment
+    print ("The long version of this script analyzes 5000+ stocks.")
+    print ("The alternative is a quick version that just analyzes a few dozen stocks.")
+    y_or_n = raw_input('Do you wish to run the long version?  (Y/N)\n')
+    y_or_n = y_or_n.lower()
+    if (y_or_n == 'y' or y_or_n == 'yes'):
+        print "Running the long version"
+    else:
+        run_long = False
+        print "Running the short version"
 
 ######################################################################################
 # PART 3: DOWNLOAD THE LISTS OF AMEX, NYSE, AND NASDAQ STOCKS FROM THE NASDAQ WEB SITE
@@ -135,24 +138,25 @@ def download_page (url, file_name, file_age_max_hours):
 
 # Purpose: download the CSV file listing all stocks on the exchange
 # http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download
-URL_BASE_NASDAQ = 'http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange='
-URL_END_NASDAQ = '&render=download'
+if run_long:
+    URL_BASE_NASDAQ = 'http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange='
+    URL_END_NASDAQ = '&render=download'
 
-url1 = URL_BASE_NASDAQ + 'AMEX' + URL_END_NASDAQ
-url2 = URL_BASE_NASDAQ + 'NYSE' + URL_END_NASDAQ
-url3 = URL_BASE_NASDAQ + 'NASDAQ' + URL_END_NASDAQ
+    url1 = URL_BASE_NASDAQ + 'AMEX' + URL_END_NASDAQ
+    url2 = URL_BASE_NASDAQ + 'NYSE' + URL_END_NASDAQ
+    url3 = URL_BASE_NASDAQ + 'NASDAQ' + URL_END_NASDAQ
 
-file1 = dir_input + '/companylist-amex.csv'
-file2 = dir_input + '/companylist-nyse.csv'
-file3 = dir_input + '/companylist-nasdaq.csv'
-file_age_max_hours = 12
+    file1 = dir_input + '/companylist-amex.csv'
+    file2 = dir_input + '/companylist-nyse.csv'
+    file3 = dir_input + '/companylist-nasdaq.csv'
+    file_age_max_hours = 12
 
-print ('Downloading list of AMEX stocks')
-download_page (url1, file1, file_age_max_hours)
-print ('Downloading list of NYSE stocks')
-download_page (url2, file2, file_age_max_hours)
-print ('Downloading list of NASDAQ stocks')
-download_page (url3, file3, file_age_max_hours)
+    print ('Downloading list of AMEX stocks')
+    download_page (url1, file1, file_age_max_hours)
+    print ('Downloading list of NYSE stocks')
+    download_page (url2, file2, file_age_max_hours)
+    print ('Downloading list of NASDAQ stocks')
+    download_page (url3, file3, file_age_max_hours)
 
 ##############################################################################################
 # PART 4: For a given exchange, obtain a list of ticker symbols for stocks that are NOT funds.
@@ -485,17 +489,17 @@ list_industry = Exchange1.industry_selected ()
 # END: this section is for testing purposes
 
 # BEGIN: enable this section for analyzing all AMEX, NYSE, and NASDAQ stocks
+if run_long:
+    Exchange1 = Exchange ('amex')
+    Exchange2 = Exchange ('nasdaq')
+    Exchange3 = Exchange ('nyse')
 
-Exchange1 = Exchange ('amex')
-Exchange2 = Exchange ('nasdaq')
-Exchange3 = Exchange ('nyse')
-
-list_symbol = Exchange1.symbol_selected () + Exchange2.symbol_selected () + Exchange3.symbol_selected ()
-list_name = Exchange1.name_selected () + Exchange2.name_selected () + Exchange3.name_selected ()
-list_price = Exchange1.price_selected () + Exchange2.price_selected () + Exchange3.price_selected ()
-list_nshares = Exchange1.nshares_selected () + Exchange2.nshares_selected () + Exchange3.nshares_selected ()
-list_sector = Exchange1.sector_selected () + Exchange2.sector_selected () + Exchange3.sector_selected ()
-list_industry = Exchange1.industry_selected () + Exchange2.industry_selected () + Exchange3.industry_selected ()
+    list_symbol = Exchange1.symbol_selected () + Exchange2.symbol_selected () + Exchange3.symbol_selected ()
+    list_name = Exchange1.name_selected () + Exchange2.name_selected () + Exchange3.name_selected ()
+    list_price = Exchange1.price_selected () + Exchange2.price_selected () + Exchange3.price_selected ()
+    list_nshares = Exchange1.nshares_selected () + Exchange2.nshares_selected () + Exchange3.nshares_selected ()
+    list_sector = Exchange1.sector_selected () + Exchange2.sector_selected () + Exchange3.sector_selected ()
+    list_industry = Exchange1.industry_selected () + Exchange2.industry_selected () + Exchange3.industry_selected ()
 
 # END: enable this section for analyzing all AMEX, NYSE, and NASDAQ stocks
 
@@ -745,13 +749,18 @@ list_pb = []
 list_assets_smartmoney = []
 list_assets_yahoo = []
 list_assets_ratio = []
+list_assets_suspect = []
 list_rev_smartmoney = []
 list_rev_yahoo = []
 list_rev_ratio = []
-list_diff_db = []
+list_rev_suspect = []
 list_ppe_growth = []
 list_ppe_growth_dev = []
 list_ppe_suspect = []
+list_roe_dev = []
+list_roe_unstable = []
+list_roe_low = []
+list_iv_none = []
 
 i_stock = 0
 i_stock_max = len (list_symbol)
@@ -1085,9 +1094,9 @@ for symbol in list_symbol:
     list_yield.append (yld)
 
 
-    #############################################
-    # SANITY CHECKS: DETERMINE IF DATA IS SUSPECT
-    #############################################
+    ########################################################################
+    # FILTERING CRITERIA: FLAG STOCKS THAT HAVE BAD DATA OR ARE INCOMPATIBLE
+    ########################################################################
 
     # Check for asset value difference between Smartmoney and Yahoo Finance
     assets0 = 0
@@ -1106,10 +1115,16 @@ for symbol in list_symbol:
 
     assets_ratio = 0
     try:
-        assets_ratio = db (assets0 / assets0_alt) # dB
+        assets_ratio = abs (db (assets0 / assets0_alt)) # dB
     except:
         assets_ratio = None
     list_assets_ratio.append (assets_ratio)
+
+    # If the Smartmoney and the Yahoo Finance asset figures differ by 2 dB or more, suspect bad data.
+    assets_suspect = False
+    if assets_ratio >= 2 or assets_ratio == None:
+        assets_suspect = True
+    list_assets_suspect.append (assets_suspect)
 
     # Check for revenue difference between Smartmoney and Yahoo Finance
     rev0 = 0
@@ -1127,15 +1142,17 @@ for symbol in list_symbol:
     list_rev_yahoo.append (rev0_alt)
 
     rev_ratio = 0
-    diff_db = -1000
     try:
-        rev_ratio = db (rev0 / rev0_alt) # dB
-        diff_db = abs (assets_ratio) + abs (rev_ratio) # dB
+        rev_ratio = abs (db (rev0 / rev0_alt)) # dB
     except:
         rev_ratio = None
-        diff_db = None
     list_rev_ratio.append (rev_ratio)
-    list_diff_db.append (diff_db)
+
+    # If the Smartmoney and the Yahoo Finance revenue figures differ by 2 dB or more, suspect bad data.
+    rev_suspect = False
+    if rev_ratio >= 2 or rev_ratio == None:
+        rev_suspect = True
+    list_rev_suspect.append (rev_suspect)
     
     ppe0_db = 0
     ppe1_db = 0
@@ -1143,7 +1160,6 @@ for symbol in list_symbol:
     ppe3_db = 0
     ppe_growth = 0
     ppe_growth_dev = 0
-    ppe_suspect = False
     try:
         ppe0_db = db (ppe0/ppe1)
         ppe1_db = db (ppe1/ppe2)
@@ -1151,15 +1167,48 @@ for symbol in list_symbol:
         ppe3_db = db (ppe3/ppe4)
         ppe_growth = ave ([ppe0_db, ppe1_db, ppe2_db, ppe3_db]) # dB
         ppe_growth_dev = std_dev ([ppe0_db, ppe1_db, ppe2_db, ppe3_db]) # dB
-        if (ppe_growth_dev > 2): # 2dB or greater is flagrant
-            ppe_suspect = True
     except:
         ppe_growth = None
         ppe_growth_dev = None
     list_ppe_growth.append (ppe_growth)
     list_ppe_growth_dev.append (ppe_growth_dev)
-    print ppe0, ppe1, ppe2, ppe3, ppe4
-    print ppe_growth, ppe_growth_dev
+
+    # If the standard deviation of the PPE growth is at least 1 dB, suspect bad data.
+    ppe_suspect = False
+    if ppe_growth_dev >= 1 or ppe_growth_dev == None:
+        ppe_suspect = True
+    list_ppe_suspect.append (ppe_suspect)
+
+    # Get relative standard deviation of ROE
+    roe_dev = 0
+    try:
+        roe_dev = std_dev ([roe0, roe1, roe2, roe3]) / roe_ave
+        roe_dev = abs (roe_dev)
+    except:
+        roe_dev = None
+    list_roe_dev.append (roe_dev)
+
+    # If the relative standard deviation of the Dopeler ROE is at least 50%, performance is too volatile
+    # to be compatible with Doppler Value Investing.
+    roe_unstable = False
+    if roe_dev >= .5 or roe_dev == None:
+        roe_unstable = True
+    list_roe_unstable.append (roe_unstable)
+
+    # If the average Dopeler ROE is under 10%, this is too low to be compatible with Doppler Value Investing.
+    # to be compatible with Doppler Value Investing.
+    roe_low = False
+    if roe_ave <.1 or roe_ave == None:
+        roe_low = True
+    list_roe_low.append (roe_low)
+
+    # If there is no intrinsic value or negative intrinsic value, this stock is not compatible with Doppler
+    # Value Investing.
+    iv_none = False
+    if intrinsic_ps <=0 or intrinsic_ps == None:
+        iv_none = True
+    list_iv_none.append (iv_none)
+
 
     i_stock = i_stock + 1
     now = time.time ()
@@ -1172,77 +1221,6 @@ for symbol in list_symbol:
 ######################################################
 # PART 7: PRINT THE RESULTS (UNFILTERED) TO A CSV FILE
 ######################################################
-
-i_stock = 0
-i_stock_max = len (list_symbol) -1
-create_dir (dir_output) # Create output directory if it does not already exist
-filename_output = dir_output + "/results-unfiltered.csv"
-
-with open(filename_output, 'w') as csvfile:
-    resultswriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    h1 = 'Symbol'
-    h2 = 'Name'
-    h3 = 'Price'
-    h4 = 'Dopeler\nROE\n(Ave.)'
-    h5 = 'Dopeler\nP/B'
-    h6 = 'Dopeler\nPE'
-    h7 = 'Dopeler\nYield'
-    h8 = 'Dopeler\nBook\nValue'
-    h9 = 'Dopeler\nEPS'
-    h10 = 'Net\nLiquidity/Share'
-    h11 = 'Sector'
-    h12 = 'Industry'
-    h13 = 'Assets\n(billions,\nSmartMoney)'
-    h14 = 'Assets\n(billions,\nYahoo)'
-    h15 = 'Revenue\n(billions,\nSmartMoney)'
-    h16 = 'Revenue\n(billions,\nYahoo)'
-    h17 = 'Assets\nRatio\n(dB)'
-    h18 = 'Revenue\nRatio\n(dB)'
-    h19 = 'Total\nDiff.\n(dB)'
-    h20 = 'PPE\nGrowth\n(dB)'
-    h21 = 'PPE\nGrowth\nStd.\nDev\n(dB)'
-    h22 = 'Dopeler\nROE (Y1)'
-    h23 = 'Dopeler\nROE (Y2)'
-    h24 = 'Dopeler\nROE (Y3)'
-    h25 = 'Dopeler\nROE (Y4)'
-
-    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20, h21, h22, h23, h24, h25])
-    while i_stock <= i_stock_max:
-        c1 = list_symbol [i_stock]
-        c2 = list_name [i_stock]
-        c3 = str (list_price [i_stock])
-        c4 = str (list_roe_ave [i_stock])
-        c5 = str (list_pb [i_stock])
-        c6 = str (list_pe [i_stock])
-        c7 = str (list_yield [i_stock])
-        c8 = str (list_intrinsic_ps [i_stock])
-        c9 = str (list_eps [i_stock])
-        c10 = str( list_netliq_ps [i_stock])
-        c11 = list_sector [i_stock]
-        c12 = list_industry [i_stock]
-        c13 = str (list_assets_smartmoney [i_stock])
-        c14 = str (list_assets_yahoo [i_stock])
-        c15 = str (list_rev_smartmoney [i_stock])
-        c16 = str (list_rev_yahoo [i_stock])
-        c17 = str (list_assets_ratio [i_stock])
-        c18 = str (list_rev_ratio [i_stock])
-        c19 = str (list_diff_db [i_stock])
-        c20 = str (list_ppe_growth [i_stock])
-        c21 = str (list_ppe_growth_dev [i_stock])
-        c22 = str (list_roe0 [i_stock])
-        c23 = str (list_roe1 [i_stock])
-        c24 = str (list_roe2 [i_stock])
-        c25 = str (list_roe3 [i_stock])
-        
-        resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25])
-        i_stock = i_stock + 1
-    
-####################################################
-# PART 8: PRINT THE RESULTS (FILTERED) TO A CSV FILE
-####################################################
-# Exclude the following in the filtered results:
-# "N/A" for every quantitative parameter
-# Excessive discrepancies between the Smartmoney figures and the Yahoo Finance figures for assets and revenues
 
 # Round a number to the nearest thousandth, convert to a string
 # Input: number
@@ -1288,6 +1266,91 @@ def percent_tenth (num_input):
         str_output = 'N/A'
     return str_output
 
+
+
+i_stock = 0
+i_stock_max = len (list_symbol) -1
+create_dir (dir_output) # Create output directory if it does not already exist
+filename_output = dir_output + "/results-unfiltered.csv"
+
+with open(filename_output, 'w') as csvfile:
+    resultswriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    h1 = 'Symbol'
+    h2 = 'Name'
+    h3 = 'Price'
+    h4 = 'Assets\nSuspect?'
+    h5 = 'Rev.\nSuspect?'
+    h6 = 'PPE\nSuspect?'
+    h7 = 'ROE\nUnstable?'
+    h8 = 'ROE\nLow?'
+    h9 = 'No\nDopeler\nBook\nValue?'
+
+    h10 = 'Dopeler\nROE\n(Ave.)'
+    h11 = 'Dopeler\nP/B'
+    h12 = 'Dopeler\nPE'
+    h13 = 'Dopeler\nYield'
+    h14 = 'Dopeler\nBook\nValue'
+    h15 = 'Dopeler\nEPS'
+    h16 = 'Net\nLiquidity/Share'
+    h17 = 'Sector'
+    h18 = 'Industry'
+    h20 = 'Assets\n(billions,\nSmartMoney)'
+    h21 = 'Assets\n(billions,\nYahoo)'
+    h22 = 'Assets\nRatio\n(dB)'
+    h23 = 'Revenue\n(billions,\nSmartMoney)'
+    h24 = 'Revenue\n(billions,\nYahoo)'
+    h25 = 'Revenue\nRatio\n(dB)'
+    h26 = 'PPE\nGrowth\n(dB)'
+    h27 = 'PPE\nGrowth\nStd.\nDev\n(dB)'
+    h28 = 'Dopeler\nROE\n(rel.\nstd.\ndev.)'
+    h29 = 'Dopeler\nROE (Y1)'
+    h30 = 'Dopeler\nROE (Y2)'
+    h31 = 'Dopeler\nROE (Y3)'
+    h32 = 'Dopeler\nROE (Y4)'
+
+    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h20, h21, h22, h23, h24, h25, h26, h27, h28, h29, h30, h31, h32])
+    while i_stock <= i_stock_max:
+        c1 = list_symbol [i_stock]
+        c2 = list_name [i_stock]
+        c3 = str (list_price [i_stock])
+        c4 = str (list_assets_suspect [i_stock])
+        c5 = str (list_rev_suspect [i_stock])
+        c6 = str (list_ppe_suspect [i_stock])
+        c7 = str (list_roe_unstable [i_stock])
+        c8 = str (list_roe_low [i_stock])
+        c9 = str (list_iv_none [i_stock])
+
+        c10 = str (list_roe_ave [i_stock])
+        c11 = str (list_pb [i_stock])
+        c12 = str (list_pe [i_stock])
+        c13 = str (list_yield [i_stock])
+        c14 = str (list_intrinsic_ps [i_stock])
+        c15 = str (list_eps [i_stock])
+        c16 = str( list_netliq_ps [i_stock])
+        c17 = list_sector [i_stock]
+        c18 = list_industry [i_stock]
+
+        c20 = str (list_assets_smartmoney [i_stock])
+        c21 = str (list_assets_yahoo [i_stock])
+        c22 = dec_thou (list_assets_ratio [i_stock])
+        c23 = str (list_rev_smartmoney [i_stock])
+        c24 = str (list_rev_yahoo [i_stock])
+        c25 = dec_thou (list_rev_ratio [i_stock])
+        c26 = dec_thou (list_ppe_growth [i_stock])
+        c27 = dec_thou (list_ppe_growth_dev [i_stock])
+        c28 = dec_thou (list_roe_dev [i_stock])
+        c29 = str (list_roe0 [i_stock])
+        c30 = str (list_roe1 [i_stock])
+        c31 = str (list_roe2 [i_stock])
+        c32 = str (list_roe3 [i_stock])
+        
+        resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32])
+        i_stock = i_stock + 1
+    
+####################################################
+# PART 8: PRINT THE RESULTS (FILTERED) TO A CSV FILE
+####################################################
+
 i_stock = 0
 i_stock_max = len (list_symbol) -1
 filename_output = dir_output + "/results.csv"
@@ -1297,19 +1360,20 @@ with open(filename_output, 'w') as csvfile:
     h1 = 'Symbol'
     h2 = 'Name'
     h3 = 'Price'
-    h4 = 'Dopeler\nROE\n(Ave.)'
-    h5 = 'Dopeler\nP/B'
-    h6 = 'Dopeler\nPE'
-    h7 = 'Dopeler\nYield'
-    h8 = 'Dopeler\nBook\nValue'
-    h9 = 'Dopeler\nEPS'
-    h10 = 'Net\nLiquidity/Share'
-    h11 = 'Sector'
-    h12 = 'Industry'
-    h13 = 'Dopeler\nROE (Y1)'
-    h14 = 'Dopeler\nROE (Y2)'
-    h15 = 'Dopeler\nROE (Y3)'
-    h16 = 'Dopeler\nROE (Y4)'
+    h4 = 'Dopeler\nP/B'
+    h5 = 'Dopeler\nROE\n(Ave.)'
+    h6 = 'Dopeler\nROE\nDev.'
+    h7 = 'Dopeler\nPE'
+    h8 = 'Dopeler\nYield'
+    h9 = 'Dopeler\nBook\nValue'
+    h10 = 'Dopeler\nEPS'
+    h11 = 'Net\nLiquidity/Share'
+    h12 = 'Sector'
+    h13 = 'Industry'
+    h14 = 'Assets\nDiff.\n(dB)'
+    h15 = 'Rev.\nDiff\n(dB)'
+    h16 = 'PPE\nGrowth\nDev.\n(dB)'
+
     resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16])
     while i_stock <= i_stock_max:
         roe_ave = list_roe_ave [i_stock] # Dopeler ROE
@@ -1319,26 +1383,32 @@ with open(filename_output, 'w') as csvfile:
         bv = list_intrinsic_ps [i_stock] # Dopeler Book Value (estimated intrinsic value)
         eps = list_eps [i_stock] # Dopeler Earnings Per Share
         netliq = list_netliq_ps [i_stock] # Net liquidity per share
-        diff_db = list_diff_db [i_stock]
 
-        any_values = any ([roe_ave, pb, pe, yld, bv, eps, netliq])
-        if any_values == True and diff_db < 1:
+        cond1 = list_assets_suspect [i_stock]
+        cond2 = list_rev_suspect [i_stock]
+        cond3 = list_ppe_suspect [i_stock]
+        cond4 = list_roe_unstable [i_stock]
+        cond5 = list_roe_low [i_stock]
+        cond6 = list_iv_none [i_stock]
+        to_print = not (cond1 or cond2 or cond3 or cond4 or cond5 or cond6)
+
+        if to_print == True:
             c1 = list_symbol [i_stock]
             c2 = list_name [i_stock]
             c3 = dec_hund (list_price [i_stock])
-            c4 = percent_tenth (list_roe_ave [i_stock])
-            c5 = dec_hund (list_pb [i_stock])
-            c6 = dec_tenth (list_pe [i_stock])
-            c7 = percent_tenth (list_yield [i_stock])
-            c8 = dec_hund (list_intrinsic_ps [i_stock])
-            c9 = dec_thou (list_eps [i_stock])
-            c10 = dec_hund( list_netliq_ps [i_stock])
-            c11 = list_sector [i_stock]
-            c12 = list_industry [i_stock]
-            c13 = percent_tenth (list_roe0 [i_stock])
-            c14 = percent_tenth (list_roe1 [i_stock])
-            c15 = percent_tenth (list_roe2 [i_stock])
-            c16 = percent_tenth (list_roe3 [i_stock])
+            c4 = dec_hund (list_pb [i_stock])
+            c5 = percent_tenth (list_roe_ave [i_stock])
+            c6 = percent_tenth (list_roe_dev [i_stock])
+            c7 = dec_tenth (list_pe [i_stock])
+            c8 = percent_tenth (list_yield [i_stock])
+            c9 = dec_hund (list_intrinsic_ps [i_stock])
+            c10 = dec_thou (list_eps [i_stock])
+            c11 = dec_hund( list_netliq_ps [i_stock])
+            c12 = list_sector [i_stock]
+            c13 = list_industry [i_stock]
+            c14 = dec_thou (list_assets_ratio [i_stock])
+            c15 = dec_thou (list_rev_ratio [i_stock])
+            c16 = dec_thou (list_ppe_growth_dev [i_stock])
         
             resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16])
         i_stock = i_stock + 1
