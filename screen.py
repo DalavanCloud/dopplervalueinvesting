@@ -1351,14 +1351,14 @@ with open(filename_output, 'w') as csvfile:
         c8 = str (list_roe_low [i_stock])
         c9 = str (list_iv_none [i_stock])
 
-        c10 = str (list_roe_ave [i_stock])
-        c11 = str (list_roe_lowball [i_stock])
-        c12 = str (list_pb [i_stock])
-        c13 = str (list_pe [i_stock])
-        c14 = str (list_yield [i_stock])
-        c15 = str (list_intrinsic_ps [i_stock])
-        c16 = str (list_eps [i_stock])
-        c17 = str( list_netliq_ps [i_stock])
+        c10 = dec_thou (list_roe_ave [i_stock])
+        c11 = dec_thou (list_roe_lowball [i_stock])
+        c12 = dec_hund (list_pb [i_stock])
+        c13 = dec_tenth (list_pe [i_stock])
+        c14 = dec_thou (list_yield [i_stock])
+        c15 = dec_hund (list_intrinsic_ps [i_stock])
+        c16 = dec_thou (list_eps [i_stock])
+        c17 = dec_hund ( list_netliq_ps [i_stock])
         c18 = list_sector [i_stock]
         c19 = list_industry [i_stock]
 
@@ -1371,10 +1371,10 @@ with open(filename_output, 'w') as csvfile:
         c26 = dec_thou (list_ppe_growth [i_stock])
         c27 = dec_thou (list_ppe_growth_dev [i_stock])
         c28 = dec_thou (list_roe_dev [i_stock])
-        c29 = str (list_roe0 [i_stock])
-        c30 = str (list_roe1 [i_stock])
-        c31 = str (list_roe2 [i_stock])
-        c32 = str (list_roe3 [i_stock])
+        c29 = dec_thou (list_roe0 [i_stock])
+        c30 = dec_thou (list_roe1 [i_stock])
+        c31 = dec_thou (list_roe2 [i_stock])
+        c32 = dec_thou (list_roe3 [i_stock])
         
         resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32])
         i_stock = i_stock + 1
@@ -1394,10 +1394,9 @@ with open(filename_output, 'w') as csvfile:
     h3 = 'Price'
     h4 = 'Dopeler\nP/B'
     h5 = 'Dopeler\nROE\n(Ave.)'
-    h6 = 'Dopeler\nROE\n(Lowball)'
-    h7 = 'Dopeler\nROE\nDev.'
-    h8 = 'Dopeler\nPE'
-    h9 = 'Dopeler\nYield'
+    h6 = 'Dopeler\nROE\n(Lowball)''
+    h7 = 'Dopeler\nPE'
+    h8 = 'Dopeler\nYield'
     h10 = 'Dopeler\nBook\nValue'
     h11 = 'Dopeler\nEPS'
     h12 = 'Net\nLiquidity/Share'
@@ -1407,7 +1406,7 @@ with open(filename_output, 'w') as csvfile:
     h16 = 'Rev.\nDiff\n(dB)'
     h17 = 'PPE\nGrowth\nDev.\n(dB)'
 
-    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17])
+    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h10, h11, h12, h13, h14, h15, h16, h17])
     while i_stock <= i_stock_max:
         roe_ave = list_roe_ave [i_stock] # Dopeler ROE
         pb = list_pb [i_stock] # Dopeler Price/Book
@@ -1428,13 +1427,12 @@ with open(filename_output, 'w') as csvfile:
         if to_print == True:
             c1 = list_symbol [i_stock]
             c2 = list_name [i_stock]
-            c3 = dec_hund (list_price [i_stock])
+            c3 = str (list_price [i_stock])
             c4 = dec_hund (list_pb [i_stock])
-            c5 = percent_tenth (list_roe_ave [i_stock])
-            c6 = percent_tenth (list_roe_lowball [i_stock])
-            c7 = percent_tenth (list_roe_dev [i_stock])
-            c8 = dec_tenth (list_pe [i_stock])
-            c9 = percent_tenth (list_yield [i_stock])
+            c5 = dec_thou (list_roe_ave [i_stock])
+            c6 = dec_thou (list_roe_lowball [i_stock])
+            c7 = dec_tenth (list_pe [i_stock])
+            c8 = dec_thou (list_yield [i_stock])
             c10 = dec_hund (list_intrinsic_ps [i_stock])
             c11 = dec_thou (list_eps [i_stock])
             c12 = dec_hund( list_netliq_ps [i_stock])
@@ -1444,7 +1442,7 @@ with open(filename_output, 'w') as csvfile:
             c16 = dec_thou (list_rev_ratio [i_stock])
             c17 = dec_thou (list_ppe_growth_dev [i_stock])
         
-            resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17])
+            resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c10, c11, c12, c13, c14, c15, c16, c17])
         i_stock = i_stock + 1
 
 ###############################################
