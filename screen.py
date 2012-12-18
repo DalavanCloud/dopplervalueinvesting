@@ -758,6 +758,7 @@ list_ppe_growth = []
 list_ppe_growth_dev = []
 list_ppe_suspect = []
 list_roe_dev = []
+list_roe_lowball = []
 list_roe_unstable = []
 list_roe_low = []
 list_iv_none = []
@@ -1179,7 +1180,7 @@ for symbol in list_symbol:
         ppe_suspect = True
     list_ppe_suspect.append (ppe_suspect)
 
-    # Get relative standard deviation of ROE
+    # Get relative standard deviation of Dopeler ROE
     roe_dev = 0
     try:
         roe_dev = std_dev ([roe0, roe1, roe2, roe3]) / roe_ave
@@ -1188,6 +1189,35 @@ for symbol in list_symbol:
         roe_dev = None
     list_roe_dev.append (roe_dev)
 
+    # Get lowest Dopeler ROE
+    roe_min = 0
+    try:
+        roe_min = min (roe0, roe1, roe2, roe3)
+    except:
+        roe_min = None
+
+    # Get lowball Dopeler ROE (lowest Dopeler ROE or 1 standard deviation below average, whichever is greater)
+    # This ensures that the lowball Dopeler ROE is never lower than the lowest Dopeler ROE.
+
+    # Example 1: Given a set of (1, 1, 1, 2), the average is 1.25, and the sample standard deviation is .5.
+    # The lowest value is 1, but 1 standard deviation below average is only 0.75.
+    # The lowball value is 1.
+
+    # Example 2: Given a set of (1, 1, 1, 1), the average is 1, and the sample standard deviation is 0.
+    # The lowest value is 1, but 1 standard deviation below average is 1.
+    # The lowball value is 1.
+
+    # Example 3: Given a set of (1, 1, 1, 0), the average is .75, and the sample standard deviation is .5.
+    # The lowest value is 0, and 1 standard deviation below average is .25.
+    # The lowball value is 0.25.
+
+    roe_lowball = 0
+    try:
+        roe_lowball = max (roe_min, roe_ave - roe_dev)
+    except:
+        roe_lowball = None
+    list_roe_lowball.append (roe_lowball)
+
     # If the relative standard deviation of the Dopeler ROE is at least 50%, performance is too volatile
     # to be compatible with Doppler Value Investing.
     roe_unstable = False
@@ -1195,10 +1225,10 @@ for symbol in list_symbol:
         roe_unstable = True
     list_roe_unstable.append (roe_unstable)
 
-    # If the average Dopeler ROE is under 10%, this is too low to be compatible with Doppler Value Investing.
+    # If the lowball Dopeler ROE is under 10%, this is too low to be compatible with Doppler Value Investing.
     # to be compatible with Doppler Value Investing.
     roe_low = False
-    if roe_ave <.1 or roe_ave == None:
+    if roe_lowball <.1 or roe_lowball == None:
         roe_low = True
     list_roe_low.append (roe_low)
 
@@ -1286,14 +1316,15 @@ with open(filename_output, 'w') as csvfile:
     h9 = 'No\nDopeler\nBook\nValue?'
 
     h10 = 'Dopeler\nROE\n(Ave.)'
-    h11 = 'Dopeler\nP/B'
-    h12 = 'Dopeler\nPE'
-    h13 = 'Dopeler\nYield'
-    h14 = 'Dopeler\nBook\nValue'
-    h15 = 'Dopeler\nEPS'
-    h16 = 'Net\nLiquidity/Share'
-    h17 = 'Sector'
-    h18 = 'Industry'
+    h11 = 'Dopeler\nROE\n(Lowball)'
+    h12 = 'Dopeler\nP/B'
+    h13 = 'Dopeler\nPE'
+    h14 = 'Dopeler\nYield'
+    h15 = 'Dopeler\nBook\nValue'
+    h16 = 'Dopeler\nEPS'
+    h17 = 'Net\nLiquidity/Share'
+    h18 = 'Sector'
+    h19 = 'Industry'
     h20 = 'Assets\n(billions,\nSmartMoney)'
     h21 = 'Assets\n(billions,\nYahoo)'
     h22 = 'Assets\nRatio\n(dB)'
@@ -1308,7 +1339,7 @@ with open(filename_output, 'w') as csvfile:
     h31 = 'Dopeler\nROE (Y3)'
     h32 = 'Dopeler\nROE (Y4)'
 
-    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h20, h21, h22, h23, h24, h25, h26, h27, h28, h29, h30, h31, h32])
+    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20, h21, h22, h23, h24, h25, h26, h27, h28, h29, h30, h31, h32])
     while i_stock <= i_stock_max:
         c1 = list_symbol [i_stock]
         c2 = list_name [i_stock]
@@ -1321,14 +1352,15 @@ with open(filename_output, 'w') as csvfile:
         c9 = str (list_iv_none [i_stock])
 
         c10 = str (list_roe_ave [i_stock])
-        c11 = str (list_pb [i_stock])
-        c12 = str (list_pe [i_stock])
-        c13 = str (list_yield [i_stock])
-        c14 = str (list_intrinsic_ps [i_stock])
-        c15 = str (list_eps [i_stock])
-        c16 = str( list_netliq_ps [i_stock])
-        c17 = list_sector [i_stock]
-        c18 = list_industry [i_stock]
+        c11 = str (list_roe_lowball [i_stock])
+        c12 = str (list_pb [i_stock])
+        c13 = str (list_pe [i_stock])
+        c14 = str (list_yield [i_stock])
+        c15 = str (list_intrinsic_ps [i_stock])
+        c16 = str (list_eps [i_stock])
+        c17 = str( list_netliq_ps [i_stock])
+        c18 = list_sector [i_stock]
+        c19 = list_industry [i_stock]
 
         c20 = str (list_assets_smartmoney [i_stock])
         c21 = str (list_assets_yahoo [i_stock])
@@ -1344,7 +1376,7 @@ with open(filename_output, 'w') as csvfile:
         c31 = str (list_roe2 [i_stock])
         c32 = str (list_roe3 [i_stock])
         
-        resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32])
+        resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32])
         i_stock = i_stock + 1
     
 ####################################################
@@ -1362,19 +1394,20 @@ with open(filename_output, 'w') as csvfile:
     h3 = 'Price'
     h4 = 'Dopeler\nP/B'
     h5 = 'Dopeler\nROE\n(Ave.)'
-    h6 = 'Dopeler\nROE\nDev.'
-    h7 = 'Dopeler\nPE'
-    h8 = 'Dopeler\nYield'
-    h9 = 'Dopeler\nBook\nValue'
-    h10 = 'Dopeler\nEPS'
-    h11 = 'Net\nLiquidity/Share'
-    h12 = 'Sector'
-    h13 = 'Industry'
-    h14 = 'Assets\nDiff.\n(dB)'
-    h15 = 'Rev.\nDiff\n(dB)'
-    h16 = 'PPE\nGrowth\nDev.\n(dB)'
+    h6 = 'Dopeler\nROE\n(Lowball)'
+    h7 = 'Dopeler\nROE\nDev.'
+    h8 = 'Dopeler\nPE'
+    h9 = 'Dopeler\nYield'
+    h10 = 'Dopeler\nBook\nValue'
+    h11 = 'Dopeler\nEPS'
+    h12 = 'Net\nLiquidity/Share'
+    h13 = 'Sector'
+    h14 = 'Industry'
+    h15 = 'Assets\nDiff.\n(dB)'
+    h16 = 'Rev.\nDiff\n(dB)'
+    h17 = 'PPE\nGrowth\nDev.\n(dB)'
 
-    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16])
+    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17])
     while i_stock <= i_stock_max:
         roe_ave = list_roe_ave [i_stock] # Dopeler ROE
         pb = list_pb [i_stock] # Dopeler Price/Book
@@ -1398,19 +1431,20 @@ with open(filename_output, 'w') as csvfile:
             c3 = dec_hund (list_price [i_stock])
             c4 = dec_hund (list_pb [i_stock])
             c5 = percent_tenth (list_roe_ave [i_stock])
-            c6 = percent_tenth (list_roe_dev [i_stock])
-            c7 = dec_tenth (list_pe [i_stock])
-            c8 = percent_tenth (list_yield [i_stock])
-            c9 = dec_hund (list_intrinsic_ps [i_stock])
-            c10 = dec_thou (list_eps [i_stock])
-            c11 = dec_hund( list_netliq_ps [i_stock])
-            c12 = list_sector [i_stock]
-            c13 = list_industry [i_stock]
-            c14 = dec_thou (list_assets_ratio [i_stock])
-            c15 = dec_thou (list_rev_ratio [i_stock])
-            c16 = dec_thou (list_ppe_growth_dev [i_stock])
+            c6 = percent_tenth (list_roe_lowball [i_stock])
+            c7 = percent_tenth (list_roe_dev [i_stock])
+            c8 = dec_tenth (list_pe [i_stock])
+            c9 = percent_tenth (list_yield [i_stock])
+            c10 = dec_hund (list_intrinsic_ps [i_stock])
+            c11 = dec_thou (list_eps [i_stock])
+            c12 = dec_hund( list_netliq_ps [i_stock])
+            c13 = list_sector [i_stock]
+            c14 = list_industry [i_stock]
+            c15 = dec_thou (list_assets_ratio [i_stock])
+            c16 = dec_thou (list_rev_ratio [i_stock])
+            c17 = dec_thou (list_ppe_growth_dev [i_stock])
         
-            resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16])
+            resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17])
         i_stock = i_stock + 1
 
 ###############################################
