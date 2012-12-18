@@ -1394,7 +1394,7 @@ with open(filename_output, 'w') as csvfile:
     h3 = 'Price'
     h4 = 'Dopeler\nP/B'
     h5 = 'Dopeler\nROE\n(Ave.)'
-    h6 = 'Dopeler\nROE\n(Lowball)''
+    h6 = 'Dopeler\nROE\n(Lowball)'
     h7 = 'Dopeler\nPE'
     h8 = 'Dopeler\nYield'
     h10 = 'Dopeler\nBook\nValue'
