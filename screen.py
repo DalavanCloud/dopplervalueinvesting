@@ -759,7 +759,6 @@ list_ppe_growth_dev = []
 list_ppe_suspect = []
 list_roe_dev = []
 list_roe_lowball = []
-list_roe_unstable = []
 list_roe_low = []
 list_iv_none = []
 
@@ -1218,13 +1217,6 @@ for symbol in list_symbol:
         roe_lowball = None
     list_roe_lowball.append (roe_lowball)
 
-    # If the relative standard deviation of the Dopeler ROE is at least 50%, performance is too volatile
-    # to be compatible with Doppler Value Investing.
-    roe_unstable = False
-    if roe_dev >= .5 or roe_dev == None:
-        roe_unstable = True
-    list_roe_unstable.append (roe_unstable)
-
     # If the lowball Dopeler ROE is under 10%, this is too low to be compatible with Doppler Value Investing.
     # to be compatible with Doppler Value Investing.
     roe_low = False
@@ -1311,9 +1303,8 @@ with open(filename_output, 'w') as csvfile:
     h4 = 'Assets\nSuspect?'
     h5 = 'Rev.\nSuspect?'
     h6 = 'PPE\nSuspect?'
-    h7 = 'ROE\nUnstable?'
-    h8 = 'ROE\nLow?'
-    h9 = 'No\nDopeler\nBook\nValue?'
+    h7 = 'ROE\nLow?'
+    h8 = 'No\nDopeler\nBook\nValue?'
 
     h10 = 'Dopeler\nROE\n(Ave.)'
     h11 = 'Dopeler\nROE\n(Lowball)'
@@ -1339,7 +1330,7 @@ with open(filename_output, 'w') as csvfile:
     h31 = 'Dopeler\nROE (Y3)'
     h32 = 'Dopeler\nROE (Y4)'
 
-    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20, h21, h22, h23, h24, h25, h26, h27, h28, h29, h30, h31, h32])
+    resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20, h21, h22, h23, h24, h25, h26, h27, h28, h29, h30, h31, h32])
     while i_stock <= i_stock_max:
         c1 = list_symbol [i_stock]
         c2 = list_name [i_stock]
@@ -1347,9 +1338,8 @@ with open(filename_output, 'w') as csvfile:
         c4 = str (list_assets_suspect [i_stock])
         c5 = str (list_rev_suspect [i_stock])
         c6 = str (list_ppe_suspect [i_stock])
-        c7 = str (list_roe_unstable [i_stock])
-        c8 = str (list_roe_low [i_stock])
-        c9 = str (list_iv_none [i_stock])
+        c7 = str (list_roe_low [i_stock])
+        c8 = str (list_iv_none [i_stock])
 
         c10 = dec_thou (list_roe_ave [i_stock])
         c11 = dec_thou (list_roe_lowball [i_stock])
@@ -1376,7 +1366,7 @@ with open(filename_output, 'w') as csvfile:
         c31 = dec_thou (list_roe2 [i_stock])
         c32 = dec_thou (list_roe3 [i_stock])
         
-        resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32])
+        resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32])
         i_stock = i_stock + 1
     
 ####################################################
@@ -1419,10 +1409,9 @@ with open(filename_output, 'w') as csvfile:
         cond1 = list_assets_suspect [i_stock]
         cond2 = list_rev_suspect [i_stock]
         cond3 = list_ppe_suspect [i_stock]
-        cond4 = list_roe_unstable [i_stock]
-        cond5 = list_roe_low [i_stock]
-        cond6 = list_iv_none [i_stock]
-        to_print = not (cond1 or cond2 or cond3 or cond4 or cond5 or cond6)
+        cond4 = list_roe_low [i_stock]
+        cond5 = list_iv_none [i_stock]
+        to_print = not (cond1 or cond2 or cond3 or cond4 or cond5)
 
         if to_print == True:
             c1 = list_symbol [i_stock]
