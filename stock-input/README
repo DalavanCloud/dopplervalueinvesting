@@ -1,0 +1,10 @@
+This is the directory for the input financial data.
+
+The format of the input financial data files:
+*  Column 1: name of the line items
+*  Column 2: the specific category that the line item of Column 1 fits under
+*  Row 1: the year, with the most recent year first
+*  Row 2: split factor
+*  Row 3: units of the financial data for all "plus" line items
+*  Row 4: units of the financial data for all "minus" line items (only necessary if minority interest is a factor)
+*  All other rows and columns contain the financial data of a given line item and year

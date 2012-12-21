@@ -1,0 +1,33 @@
+C_delta = change in cash on balance sheet
+
+C_oo = official cash flow from operations
+C_oi = official cash flow from investing
+C_of = official cash flow from financing
+
+C_do = Doppler cash flow from operations, pre-tax
+C_tax = income tax paid, from income statement
+C_di = Doppler cash flow from investing
+C_df = Doppler cash flow from financing
+
+C_dadj = adjustments from official cash flow to Doppler cash flow
+int_exp = interest expense
+int_inc = interest income
+adj_liab = adjustments from changes in short-term liabilities
+gain_no = non-offset gains officially classified as operating
+loss_no = non-offset losses officially classified as operating
+C_I2O = line items moved from investing to operating
+C_F2O = line items moved from financing to operating
+
+C_delta = C_oo + C_oi + C_of
+C_oo = C_delta - C_oi - C_of
+
+C_delta = C_do - C_tax + C_di + C_df
+C_do = C_delta + C_tax - C_di - C_df
+
+C_do = C_delta + C_tax - C_oi - C_of + C_dadj
+
+C_dadj = int_exp - int_inc - adj_liab - gain_no + loss_no + C_I2O + C_F2O
+
+C_do = C_tax + int_exp - int_inc - adj_liab - gain_no + loss_no - C_oi + C_I2O - C_of + C_F2O + C_delta
+
+C_do = C_tax + int_exp - int_inc - adj_liab - gain_no + loss_no + C_oo + C_I2O + C_F2O

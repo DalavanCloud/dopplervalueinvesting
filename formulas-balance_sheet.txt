@@ -1,0 +1,27 @@
+LIAB_ot = official total liabilities
+ASSET_ot = official total assets
+EQ_ot = official total shareholder's equity
+
+LIAB_ps = nonconvertible preferred stock
+LIAB_oth = other liabilities not included in the official total
+LIAB_conv = convertible liabilities
+LIAB_dtu = Doppler total liabilities, all convertibles remain unconverted
+LIAB_dtc = Doppler total liabilities, all convertibles are converted
+
+LIQ_t = total liquid assets
+NET_u = net liquid assets, all convertibles remain unconverted
+NET_c = net liquid assets, all convertibles are converted
+
+LIAB_ot = ASSET_ot - EQ_o
+
+LIAB_dtu = LIAB_ot + LIAB_ps + LIAB_oth
+LIAB_dtc = LIAB_ot + LIAB_ps + LIAB_oth - LIAB_conv
+
+NET_u = LIQ_t - LIAB_dtu
+NET_c = LIQ_t - LIAB_dtc
+
+net liquidity = liquid assets - total liabilities
+
+total liabilities = total assets - total shareholder's equity
+
+

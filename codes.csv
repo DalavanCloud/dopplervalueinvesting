@@ -1,0 +1,65 @@
+Number,Specific Category,Sign,General Category,Description
+1,split_factor,1,split_factor,Split factor
+2,un+,1,un_p,Dollars per Unit
+3,un-,1,un_n,SUBTRACTIONS - dollars per unit
+4,liq1+,1,liq,Cash and cash equivalents
+5,liq1-,-1,liq,SUBTRACT - cash and cash equivalents
+6,liq2+,1,liq,Marketable Securities
+7,liq2-,-1,liq,SUBTRACT - marketable securities
+8,liq3+,1,liq,Other Liquid Assets
+9,liq3-,-1,liq,SUBTRACT – other liquid assets
+10,asset+,1,asset,Total Assets
+11,asset-,-1,asset,SUBTRACT – total assets
+12,equity+,1,equity,Shareholders' Equity
+13,equity-,-1,equity,SUBTRACT – shareholders' equity
+14,liab_ps+,1,liab,Preferred Stock
+15,liab_ps-,-1,liab,SUBTRACT – preferred stock
+16,liab_oth+,1,liab,Other unofficial liabilities
+17,liab_oth-,-1,liab,SUBTRACT – other unofficial liabilities
+18,liab_conv+,1,liabc,Convertible liabilities
+19,sh-unc,1,shares,Unclassified Shares
+20,sh-a,1,shares,Class A Shares
+21,sh-b,1,shares,Class B Shares
+22,sh-oth,1,shares,Other Classes of Common Shares
+23,op-unc,1,shares,Options on Unclassified Shares
+24,op-a,1,shares,Options on Class A Shares
+25,op-b,1,shares,Options on Class B Shares
+26,op-oth,1,shares,Options on Other Classes of Common Shares
+27,dil-unc,1,shares,other possible unclassified shares
+28,dil-a,1,shares,other possible class A shares
+29,dil-b,1,shares,other possible class B shares
+30,dil-oth,1,shares,other possible shares of other classes
+31,tr,-1,shares,treasury shares
+32,sh-unc-con,1,sharesc,convertible unclassified shares
+33,sh-a-con,1,sharesc,convertible A shares
+34,sh-b-con,1,sharesc,convertible B shares
+35,sh-oth-con,1,sharesc,convertibles of other classes of common shares
+36,cf_op+,1,CF_P,Official cash flow from operations
+37,cf_op-,-1,CF_P,SUBTRACT – official cash flow from operations
+38,cf_tax+,1,CF_N2T,Income Tax Expense
+39,cf_tax-,-1,CF_N2T,SUBTRACT – income tax expense
+40,cf_int_exp+,1,CF_N2F,Interest Expense
+41,cf_int_exp-,-1,CF_N2F,SUBTRACT – interest expense
+42,cf_int_inc+,1,CF_P2F,Interest Income
+43,cf_int_inc-,-1,CF_P2F,SUBTRACT – interest income
+44,cf_gain_no+,1,CF_P2I,Non-offset gains classified as operating
+45,cf_gain_no-,-1,CF_P2I,SUBTRACT – non-offset gains classified as operating
+46,cf_loss_no+,1,CF_N2I,Non-offset losses classified as operating
+47,cf_loss_no-,-1,CF_N2I,SUBTRACT – non-offset losses classified as operating
+48,cf_liab+,1,CF_P2F,Cash flow adjustment from change in current liabilities
+49,cf_liab-,-1,CF_P2F,SUBTRACT – cash flow adjustment from change in current liabilities
+50,cf_i2o+,1,CF_2O,Line item moved from investing to operating
+51,cf_i2o-,-1,CF_2O,SUBTRACT – line item moved from investing to operating
+52,cf_f2o+,1,CF_2O,Line item moved from financing to operating
+53,cf_f2o-,-1,CF_2O,SUBTRACT – line item moved from financing to operating
+54,ppec+,1,ppec,Plant/Property/Equipment capital
+55,ppec-,-1,ppec,SUBTRACT – plant/property/equipment capital
+56,tax1,1,tax_rate,federal income tax rate
+57,tax2,1,tax_rate,state income tax rate
+58,tax3,1,tax_rate,other income taxes
+59,pt_earn,1,pt_earn,pre-tax earnings
+60,stat1,1,stat_tax,statutory federal income taxes (excludes special credits and debits)
+61,stat2,1,stat_tax,statutory state income taxes (excludes special credits and debits)
+62,stat3,1,stat_tax,statutory other income taxes (excludes special credits and debits)
+63,aud_name,0,aud_name,name of auditing company
+64,aud_rating,0,aud_rating,audit rating
