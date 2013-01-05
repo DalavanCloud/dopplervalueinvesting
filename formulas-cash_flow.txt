@@ -31,3 +31,8 @@ C_dadj = int_exp - int_inc - adj_liab - gain_no + loss_no + C_I2O + C_F2O
 C_do = C_tax + int_exp - int_inc - adj_liab - gain_no + loss_no - C_oi + C_I2O - C_of + C_F2O + C_delta
 
 C_do = C_tax + int_exp - int_inc - adj_liab - gain_no + loss_no + C_oo + C_I2O + C_F2O
+
+C_do = C_oo + C_tax + int_exp - int_inc - adj_liab - gain_no + loss_no + C_I2O + C_F2O
+
+Therefore
+CF = CFO + tax + int_exp - int_inc - adj_liab - gain_no + loss_no + CF_I2O + CF_F2O

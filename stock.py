@@ -184,6 +184,10 @@ def select_option_conv (list1, list2):
         list3.append (element)
         c = c + 1
     return list3
+
+#############################################
+# PART 3: DEFINE THE CLASS CSVFILE (filename)
+#############################################
             	
 # This defines the class CSVfile (filename).
 # Input: name of csv file
@@ -199,6 +203,12 @@ class CSVfile:
             for row in reader:
                 locallist.append (row)
         return locallist
+
+#######################################################################
+# PART 4: DEFINE THE CLASS STOCK (symbol, n_smooth, price)
+# n_smooth: number of years to average when calculating the Doppler ROE
+#######################################################################
+
 
 # This defines the class Stock (symbol)
 # Input: stock symbol

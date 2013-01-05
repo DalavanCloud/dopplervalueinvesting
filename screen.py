@@ -375,6 +375,7 @@ class Exchange:
         while n <= n_last:
             i_select = list1 [n]
             name1 = list2 [i_select]
+            name1 = name1.replace ("&#39;", "'") # Replace &#39; with '
             list_output.append (name1) 
             n = n + 1
         return list_output
