@@ -28,6 +28,7 @@ import lxml
 import lxml.html
 import re
 import math
+import operator
 
 ##########################################################################################
 # PART 1: FIGURE OUT THE DIRECTORY STRUCTURE
@@ -1241,9 +1242,248 @@ for symbol in list_symbol:
     remain_m = int (round(remain_s/60))
     print "Analysis completion: " + str(i_stock) + '/' + str(i_stock_max) + "; Minutes remaining: " + str(remain_m)
 
-######################################################
-# PART 7: PRINT THE RESULTS (UNFILTERED) TO A CSV FILE
-######################################################
+######################################################################
+# PART 8: CREATE A CLASS TO STORE EACH STOCK AND ITS OUTPUT PARAMETERS
+######################################################################
+class Stock:
+
+    def set_symbol (self, symbol):
+        self.symbol = symbol
+
+    def get_symbol (self):
+        return self.symbol
+
+    def set_name (self, name):
+        self.name = name
+
+    def get_name (self):
+        return self.name
+
+    def set_price (self, price):
+        self.price = price
+
+    def get_price (self):
+        return self.price
+
+    def set_assets_suspect (self, assets_suspect):
+        self.assets_suspect = assets_suspect
+
+    def get_assets_suspect (self):
+        return self.assets_suspect
+
+    def set_rev_suspect (self, rev_suspect):
+        self.rev_suspect = rev_suspect
+
+    def get_rev_suspect (self):
+        return self.rev_suspect
+
+    def set_ppe_suspect (self, ppe_suspect):
+        self.ppe_suspect = ppe_suspect
+
+    def get_ppe_suspect (self):
+        return self.ppe_suspect
+
+    def set_roe_low (self, roe_low):
+        self.roe_low = roe_low
+
+    def get_roe_low (self):
+        return self.roe_low
+   
+    def set_iv_none (self, iv_none):
+        self.iv_none = iv_none
+
+    def get_iv_none (self):
+        return self.iv_none
+
+    def set_roe_ave (self, roe_ave):
+        self.roe_ave = roe_ave
+
+    def get_roe_ave (self):
+        return self.roe_ave
+
+    def set_roe_lowball (self, roe_lowball):
+        self.roe_lowball = roe_lowball
+
+    def get_roe_lowball (self):
+        return self.roe_lowball
+
+    def set_pb (self, pb):
+        self.pb = pb
+
+    def get_pb (self):
+        return self.pb
+
+    def set_pe (self, pe):
+        self.pe = pe
+
+    def get_pe (self):
+        return self.pe
+
+    def set_yield (self, yld):
+        self.yld = yld
+
+    def get_yield (self):
+        return self.yld
+
+    def set_intrinsic_ps (self, intrinsic_ps):
+        self.intrinsic_ps = intrinsic_ps
+
+    def get_intrinsic_ps (self):
+        return self.intrinsic_ps
+
+    def set_eps (self, eps):
+        self.eps = eps
+
+    def get_eps (self):
+        return self.eps
+
+    def set_netliq_ps (self, netliq_ps):
+        self.netliq_ps = netliq_ps
+
+    def get_netliq_ps (self):
+        return self.netliq_ps
+
+    def set_sector (self, sector):
+        self.sector = sector
+
+    def get_sector (self):
+        return self.sector
+
+    def set_industry (self, industry):
+        self.industry = industry
+
+    def get_industry (self):
+        return self.industry
+
+    def set_assets_smartmoney (self, assets_smartmoney):
+        self.assets_smartmoney = assets_smartmoney
+
+    def get_assets_smartmoney (self):
+        return self.assets_smartmoney
+
+    def set_assets_yahoo (self, assets_yahoo):
+        self.assets_yahoo = assets_yahoo
+
+    def get_assets_yahoo (self):
+        return self.assets_yahoo
+
+    def set_assets_ratio (self, assets_ratio):
+        self.assets_ratio = assets_ratio
+
+    def get_assets_ratio (self):
+        return self.assets_ratio
+
+    def set_rev_smartmoney (self, rev_smartmoney):
+        self.rev_smartmoney = rev_smartmoney
+
+    def get_rev_smartmoney (self):
+        return self.rev_smartmoney
+
+    def set_rev_yahoo (self, rev_yahoo):
+        self.rev_yahoo = rev_yahoo
+
+    def get_rev_yahoo (self):
+        return self.rev_yahoo
+
+    def set_rev_ratio (self, rev_ratio):
+        self.rev_ratio = rev_ratio
+
+    def get_rev_ratio (self):
+        return self.rev_ratio
+
+    def set_ppe_growth (self, ppe_growth):
+        self.ppe_growth = ppe_growth
+
+    def get_ppe_growth (self):
+        return self.ppe_growth
+
+    def set_ppe_growth_dev (self, ppe_growth_dev):
+        self.ppe_growth_dev = ppe_growth_dev
+
+    def get_ppe_growth_dev (self):
+        return self.ppe_growth_dev
+
+    def set_roe_dev (self, roe_dev):
+        self.roe_dev = roe_dev
+
+    def get_roe_dev (self):
+        return self.roe_dev
+
+    def set_roe0 (self, roe0):
+        self.roe0 = roe0
+
+    def get_roe0 (self):
+        return self.roe0
+
+    def set_roe1 (self, roe1):
+        self.roe1 = roe1
+
+    def get_roe1 (self):
+        return self.roe1
+
+    def set_roe2 (self, roe2):
+        self.roe2 = roe2
+
+    def get_roe2 (self):
+        return self.roe2
+
+    def set_roe3 (self, roe3):
+        self.roe3 = roe3
+
+    def get_roe3 (self):
+        return self.roe3
+
+
+##############################
+# PART 9: FILL THE CLASS Stock
+##############################
+list_stocks = []
+i_stock = 0
+i_stock_max = len (list_symbol) -1
+
+while i_stock <= i_stock_max:
+    Stock_this = Stock ()
+    Stock_this.set_symbol (list_symbol [i_stock])
+    Stock_this.set_name (list_name [i_stock])
+    Stock_this.set_price (list_price [i_stock])
+    Stock_this.set_assets_suspect (list_assets_suspect [i_stock])
+    Stock_this.set_rev_suspect (list_rev_suspect [i_stock])
+    Stock_this.set_ppe_suspect (list_ppe_suspect [i_stock])
+    Stock_this.set_roe_low (list_roe_low [i_stock])
+    Stock_this.set_iv_none (list_iv_none [i_stock])
+    Stock_this.set_roe_ave (list_roe_ave [i_stock])
+    Stock_this.set_roe_lowball (list_roe_lowball [i_stock])
+    Stock_this.set_pb (list_pb [i_stock])
+    Stock_this.set_pe (list_pe [i_stock])
+    Stock_this.set_yield (list_yield [i_stock])
+    Stock_this.set_intrinsic_ps (list_intrinsic_ps [i_stock])
+    Stock_this.set_eps (list_eps [i_stock])
+    Stock_this.set_netliq_ps (list_netliq_ps [i_stock])
+    Stock_this.set_sector (list_sector [i_stock])
+    Stock_this.set_industry (list_industry [i_stock])
+    Stock_this.set_assets_smartmoney (list_assets_smartmoney [i_stock])
+    Stock_this.set_assets_yahoo (list_assets_yahoo [i_stock])
+    Stock_this.set_assets_ratio(list_assets_ratio [i_stock])
+    Stock_this.set_rev_smartmoney (list_rev_smartmoney [i_stock])
+    Stock_this.set_rev_yahoo (list_rev_yahoo [i_stock])
+    Stock_this.set_rev_ratio (list_rev_ratio [i_stock])
+    Stock_this.set_ppe_growth (list_ppe_growth [i_stock])
+    Stock_this.set_ppe_growth_dev (list_ppe_growth_dev [i_stock])
+    Stock_this.set_roe_dev (list_roe_dev [i_stock])
+    Stock_this.set_roe0 (list_roe0 [i_stock])
+    Stock_this.set_roe1 (list_roe1 [i_stock])
+    Stock_this.set_roe2 (list_roe2 [i_stock])
+    Stock_this.set_roe3 (list_roe3 [i_stock])
+
+    list_stocks.append (Stock_this)
+    i_stock = i_stock + 1
+
+# SORT THE LIST OF STOCKS IN ASCENDING ORDER BY DOPELER PRICE/BOOK RATIO
+list_stocks.sort(key=operator.attrgetter('pb'))
+
+#######################################################
+# PART 10: PRINT THE RESULTS (UNFILTERED) TO A CSV FILE
+#######################################################
 
 # Round a number to the nearest thousandth, convert to a string
 # Input: number
@@ -1289,8 +1529,6 @@ def percent_tenth (num_input):
         str_output = 'N/A'
     return str_output
 
-
-
 i_stock = 0
 i_stock_max = len (list_symbol) -1
 create_dir (dir_output) # Create output directory if it does not already exist
@@ -1333,46 +1571,47 @@ with open(filename_output, 'w') as csvfile:
 
     resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20, h21, h22, h23, h24, h25, h26, h27, h28, h29, h30, h31, h32])
     while i_stock <= i_stock_max:
-        c1 = list_symbol [i_stock]
-        c2 = list_name [i_stock]
-        c3 = str (list_price [i_stock])
-        c4 = str (list_assets_suspect [i_stock])
-        c5 = str (list_rev_suspect [i_stock])
-        c6 = str (list_ppe_suspect [i_stock])
-        c7 = str (list_roe_low [i_stock])
-        c8 = str (list_iv_none [i_stock])
+        Stock_this = list_stocks [i_stock]
+        c1 = Stock_this.symbol
+        c2 = Stock_this.name
+        c3 = str (Stock_this.price)
+        c4 = str (Stock_this.assets_suspect)
+        c5 = str (Stock_this.rev_suspect)
+        c6 = str (Stock_this.ppe_suspect)
+        c7 = str (Stock_this.roe_low)
+        c8 = str (Stock_this.iv_none)
 
-        c10 = dec_thou (list_roe_ave [i_stock])
-        c11 = dec_thou (list_roe_lowball [i_stock])
-        c12 = dec_hund (list_pb [i_stock])
-        c13 = dec_tenth (list_pe [i_stock])
-        c14 = dec_thou (list_yield [i_stock])
-        c15 = dec_hund (list_intrinsic_ps [i_stock])
-        c16 = dec_thou (list_eps [i_stock])
-        c17 = dec_hund ( list_netliq_ps [i_stock])
-        c18 = list_sector [i_stock]
-        c19 = list_industry [i_stock]
+        c10 = dec_thou (Stock_this.roe_ave)
+        c11 = dec_thou (Stock_this.roe_lowball)
+        c12 = dec_hund (Stock_this.pb)
+        c13 = dec_tenth (Stock_this.pe)
+        c14 = dec_thou (Stock_this.yld)
+        c15 = dec_hund (Stock_this.intrinsic_ps)
+        c16 = dec_thou (Stock_this.eps)
+        c17 = dec_hund (Stock_this.netliq_ps)
+        c18 = Stock_this.sector
+        c19 = Stock_this.industry
 
-        c20 = str (list_assets_smartmoney [i_stock])
-        c21 = str (list_assets_yahoo [i_stock])
-        c22 = dec_thou (list_assets_ratio [i_stock])
-        c23 = str (list_rev_smartmoney [i_stock])
-        c24 = str (list_rev_yahoo [i_stock])
-        c25 = dec_thou (list_rev_ratio [i_stock])
-        c26 = dec_thou (list_ppe_growth [i_stock])
-        c27 = dec_thou (list_ppe_growth_dev [i_stock])
-        c28 = dec_thou (list_roe_dev [i_stock])
-        c29 = dec_thou (list_roe0 [i_stock])
-        c30 = dec_thou (list_roe1 [i_stock])
-        c31 = dec_thou (list_roe2 [i_stock])
-        c32 = dec_thou (list_roe3 [i_stock])
+        c20 = str (Stock_this.assets_smartmoney)
+        c21 = str (Stock_this.assets_yahoo)
+        c22 = dec_thou (Stock_this.assets_ratio)
+        c23 = str (Stock_this.rev_smartmoney)
+        c24 = str (Stock_this.rev_yahoo)
+        c25 = dec_thou (Stock_this.rev_ratio)
+        c26 = dec_thou (Stock_this.ppe_growth)
+        c27 = dec_thou (Stock_this.ppe_growth_dev)
+        c28 = dec_thou (Stock_this.roe_dev)
+        c29 = dec_thou (Stock_this.roe0)
+        c30 = dec_thou (Stock_this.roe1)
+        c31 = dec_thou (Stock_this.roe2)
+        c32 = dec_thou (Stock_this.roe3)
         
         resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32])
         i_stock = i_stock + 1
-    
-####################################################
-# PART 8: PRINT THE RESULTS (FILTERED) TO A CSV FILE
-####################################################
+
+#####################################################
+# PART 11: PRINT THE RESULTS (FILTERED) TO A CSV FILE
+#####################################################
 
 i_stock = 0
 i_stock_max = len (list_symbol) -1
@@ -1399,45 +1638,46 @@ with open(filename_output, 'w') as csvfile:
 
     resultswriter.writerow ([h1, h2, h3, h4, h5, h6, h7, h8, h10, h11, h12, h13, h14, h15, h16, h17])
     while i_stock <= i_stock_max:
-        roe_ave = list_roe_ave [i_stock] # Dopeler ROE
-        pb = list_pb [i_stock] # Dopeler Price/Book
-        pe = list_pe [i_stock] # Dopeler PE
-        yld = list_yield [i_stock] # Dopeler yield
-        bv = list_intrinsic_ps [i_stock] # Dopeler Book Value (estimated intrinsic value)
-        eps = list_eps [i_stock] # Dopeler Earnings Per Share
-        netliq = list_netliq_ps [i_stock] # Net liquidity per share
+        Stock_this = list_stocks [i_stock]
+        roe_ave = Stock_this.roe_ave # Dopeler ROE
+        pb = Stock_this.pb # Dopeler Price/Book
+        pe = Stock_this.pe # Dopeler PE
+        yld = Stock_this.yld # Dopeler yield
+        bv = Stock_this.intrinsic_ps # Dopeler Book Value (estimated intrinsic value)
+        eps = Stock_this.eps # Dopeler Earnings Per Share
+        netliq = Stock_this.netliq_ps # Net liquidity per share
 
-        cond1 = list_assets_suspect [i_stock]
-        cond2 = list_rev_suspect [i_stock]
-        cond3 = list_ppe_suspect [i_stock]
-        cond4 = list_roe_low [i_stock]
-        cond5 = list_iv_none [i_stock]
+        cond1 = Stock_this.assets_suspect
+        cond2 = Stock_this.rev_suspect 
+        cond3 = Stock_this.ppe_suspect 
+        cond4 = Stock_this.roe_low 
+        cond5 = Stock_this.iv_none 
         to_print = not (cond1 or cond2 or cond3 or cond4 or cond5)
 
         if to_print == True:
-            c1 = list_symbol [i_stock]
-            c2 = list_name [i_stock]
-            c3 = str (list_price [i_stock])
-            c4 = dec_hund (list_pb [i_stock])
-            c5 = dec_thou (list_roe_ave [i_stock])
-            c6 = dec_thou (list_roe_lowball [i_stock])
-            c7 = dec_tenth (list_pe [i_stock])
-            c8 = dec_thou (list_yield [i_stock])
-            c10 = dec_hund (list_intrinsic_ps [i_stock])
-            c11 = dec_thou (list_eps [i_stock])
-            c12 = dec_hund( list_netliq_ps [i_stock])
-            c13 = list_sector [i_stock]
-            c14 = list_industry [i_stock]
-            c15 = dec_thou (list_assets_ratio [i_stock])
-            c16 = dec_thou (list_rev_ratio [i_stock])
-            c17 = dec_thou (list_ppe_growth_dev [i_stock])
+            c1 = Stock_this.symbol
+            c2 = Stock_this.name
+            c3 = str (Stock_this.price)
+            c4 = dec_hund (Stock_this.pb)
+            c5 = dec_thou (Stock_this.roe_ave)
+            c6 = dec_thou (Stock_this.roe_lowball)
+            c7 = dec_tenth (Stock_this.pe)
+            c8 = dec_thou (Stock_this.yld)
+            c10 = dec_hund (Stock_this.intrinsic_ps)
+            c11 = dec_thou (Stock_this.eps)
+            c12 = dec_hund (Stock_this.netliq_ps)
+            c13 = Stock_this.sector
+            c14 = Stock_this.industry
+            c15 = dec_thou (Stock_this.assets_ratio)
+            c16 = dec_thou (Stock_this.rev_ratio)
+            c17 = dec_thou (Stock_this.ppe_growth_dev)
         
             resultswriter.writerow([c1, c2, c3, c4, c5, c6, c7, c8, c10, c11, c12, c13, c14, c15, c16, c17])
         i_stock = i_stock + 1
 
-###############################################
-# PART 9: COPY THE CSV FILES TO THE DRUPAL SITE
-###############################################
+################################################
+# PART 12: COPY THE CSV FILES TO THE DRUPAL SITE
+################################################
 # dir_home = '/home/doppler' # Home directory on server
 # dir_output = dir_screen + '/screen-output' 
 src = dir_output + '/*'
