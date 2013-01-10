@@ -1,10 +1,11 @@
 *.csv#
 *.ods#
 screen-downloads/*
-screen-output/*.html
+screen-output/*
 screen-input/companylist-amex.csv
 screen-input/companylist-nasdaq.csv
 screen-input/companylist-nyse.csv
+screen-output/*.html
 
 *.py[cod]
 
