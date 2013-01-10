@@ -3,18 +3,12 @@
 import pwd
 import sys
 import os
+import datetime
+import time, random
+import urllib
+import urllib2
 import csv
 import glob
-import re
-
-import datetime
-import signal
-import urllib2
-import time, random
-import socket
-import urllib
-import lxml
-import lxml.html
 import re
 import math
 import operator
@@ -470,10 +464,12 @@ print "*********************************"
 #########################################################
 # PART 5: GET LIST OF STOCKS TO ANALYZE IN GREATER DETAIL
 #########################################################
+
 list_path_all = glob.glob(dir_input_stock + '/*.csv')
 i_path = 0
 i_path_max = len (list_path_all) -1
 list_path_selected = []
+list_symbol_selected = []
 while i_path <= i_path_max:
     pathname = list_path_all [i_path]
     filename = pathname
@@ -482,80 +478,51 @@ while i_path <= i_path_max:
     if filename <> "codes.csv":
         symbol = filename.replace ('.csv', '')
         symbol = symbol.upper()
-        print symbol
         list_path_selected.append (pathname)
+        list_symbol_selected.append (symbol)
     i_path = i_path + 1
 
-print list_path_selected
+#####################################################################
+# PART 6: GET NAMES AND PRICES OF STOCKS TO ANALYZE IN GREATER DETAIL
+#####################################################################
 
+# Get index number of stock symbol (string) in 1-D list
+# Inputs: string, 1-D list
+# Output: integer
+def get_index (str_input, list_input):
+    index_output = -1
+    i_item = 0
+    i_item_max = len (list_input) -1
+    while i_item <= i_item_max:
+        item_current = list_input [i_item]
+        if item_current == str_input:
+            index_output = i_item
+        i_item = i_item + 1
+    if index_output < 0:
+        index_output = None
+    return index_output
 
-
-sys.exit()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import pwd
-import os
-import csv
-import datetime
-
-##########################################################################################
-# PART 1: FIGURE OUT THE DIRECTORY STRUCTURE
-# THIS IS NEEDED TO DISTINGUISH BETWEEN THE DEVELOPMENT ENVIRONMENT AND SERVER ENVIRONMENT
-# THIS DETERMINES THE PATH TO CRITICAL DIRECTORIES AND FILES
-##########################################################################################
-
-# Assume that this is the server environment
-dir_home = '/home/doppler' # Home directory on server
-dir_stock = dir_home + '/webapps/scripts_doppler/dopplervalueinvesting'
-
-# Check this assumption
-is_server = os.path.exists(dir_home) # Determine if this is the server environment
-
-# Adjustments to make if this is the development environment instead of the server environment
-if not (is_server):
-    # Get your username (not root)
-    uname=pwd.getpwuid(1000)[0]
-    dir_home = '/home/' + uname
-    dir_stock = dir_home + '/dopplervalueinvesting'
-
-# Determine the paths of critical directories
-dir_input = dir_stock + '/stock-input'
-dir_output = dir_stock + '/stock-output' 
-
+i = 0
+i_max = len (list_symbol_selected) -1
+list_symbol_found = []
+list_path_found = []
+list_name_found = []
+list_price_found = []
+while i <= i_max:
+    path = list_path_selected [i]
+    symbol = list_symbol_selected [i]
+    i_symbol = get_index (symbol, list_symbol)
+    if i_symbol <> None:
+        name = list_name [i_symbol]
+        price = list_price [i_symbol]
+        list_symbol_found.append (symbol)
+        list_path_found.append (path)
+        list_name_found.append (name)
+        list_price_found.append (price)
+    i = i + 1
 
 ##########################
-# PART 2: DEFINE FUNCTIONS
+# PART 7: DEFINE FUNCTIONS
 ##########################
 
 # Purpose: extract a given column from a 2-D list
@@ -710,58 +677,47 @@ def select_option_conv (list1, list2):
     return list3
 
 #############################################
-# PART 3: DEFINE THE CLASS CSVFILE (filename)
+# PART 8: DEFINE THE CLASS CSVFILE (pathname)
 #############################################
             	
-# This defines the class CSVfile (filename).
-# Input: name of csv file
+# This defines the class CSVfile (pathname).
+# Input: string (name of csv file)
 # Output: 2-D list fed by the input file
 class CSVfile:
-    def __init__ (self, filename):
-        self.filename = filename
+    def __init__ (self, pathname):
+        self.pathname = pathname
 
     def filelist (self):
         locallist = []
-        with open (self.filename, 'rb') as f:
+        with open (self.pathname, 'rb') as f:
             reader = csv.reader (f, delimiter = ',', quotechar = '"', quoting = csv.QUOTE_MINIMAL)
             for row in reader:
                 locallist.append (row)
         return locallist
 
 #######################################################################
-# PART 4: DEFINE THE CLASS STOCK (symbol, n_smooth, price)
+# PART 9: DEFINE THE CLASS STOCK (symbol, path, name, price, n_smooth)
 # n_smooth: number of years to average when calculating the Doppler ROE
 #######################################################################
-
 
 # This defines the class Stock (symbol)
 # Input: stock symbol
 # Outputs: 2-D data list fed by the input file and 1-D data lists
 class Stock:
-    def __init__ (self, symbol, n_smooth, price):
+    def __init__ (self, symbol, path, name, price, n_smooth):
         self.symbol = symbol
-        self.n_smooth = n_smooth
+        self.path = path
+        self.name = name
         self.price = price
+        self.n_smooth = n_smooth
     
     # Purpose: reads the contents of the financial data file into a 2-D list
     # Input: stock file
     # Output: 2-D data list
     def data (self):
-        file_stock = CSVfile (dir_input + '/' + self.symbol + '.csv')
+        file_stock = CSVfile (path)
         list_stock = file_stock.filelist ()
         return list_stock
-
-    # Purpose: reads the contents of the company_list.csv file to 
-    # find the name of a company given the ticker symbol
-    # Input: stock file
-    # Output: string
-    def name (self):
-        file_companies = CSVfile (dir_input + '/company_list.csv')
-        list_companies = file_companies.filelist ()
-        list_symbols = column_data (list_companies, 0)
-        list_names = column_data (list_companies, 1)
-        i_symbol = list_symbols.index(self.symbol)
-        return list_names [i_symbol]
         
     # Purpose: extracts the title of each line item into a 1-D list
     # Input: 2-D data list from data function
@@ -782,7 +738,7 @@ class Stock:
         list1 = self.data ()
         spec_local = column_data (list1, 1) # First column of stock data, excludes the top row
         finallist = []
-        file_codes = CSVfile (dir_stock + '/codes.csv')
+        file_codes = CSVfile (dir_input_stock + '/codes.csv')
         list_codefile = file_codes.filelist ()
         spec_codefile = column_data (list_codefile, 1)
         gen_codefile = column_data (list_codefile, 3)
@@ -1093,7 +1049,7 @@ class Stock:
         return list1
 
     # Total assets ($)
-    def asset (self):
+    def dollars_asset (self):
         list_unplus  = self.unit_plus ()
         list_unminus = self.unit_minus ()
         list_assetplus = self.assetplus ()
@@ -1132,7 +1088,7 @@ class Stock:
         return list1    
 
     # Total equity ($)
-    def equity (self):
+    def dollars_equity (self):
         list_unplus  = self.unit_plus ()
         list_unminus = self.unit_minus ()
         list_equityplus = self.equityplus ()
@@ -1205,8 +1161,8 @@ class Stock:
     # Net liquid assets, convertibles as shares ($)
     def dollars_netliq_cshares (self):
         list_liq = self.dollars_liq ()
-        list_asset = self.asset ()
-        list_equity = self.equity ()
+        list_asset = self.dollars_asset ()
+        list_equity = self.dollars_equity ()
         list_liab = self.dollars_liab_cshares ()
         list1 = []
         n_cols = len (list_liq)
@@ -1259,8 +1215,8 @@ class Stock:
     # Net liquidity, convertibles as debt ($)
     def dollars_netliq_cdebt (self):
         list_netliq = self.dollars_netliq_cshares ()
-        list_asset = self.asset ()
-        list_equity = self.equity ()
+        list_asset = self.dollars_asset ()
+        list_equity = self.dollars_equity ()
         list_liabc = self.dollars_liab_conv ()
         list1 = []
         n_cols = len (list_netliq)
@@ -1543,7 +1499,7 @@ class Stock:
                 try:
                     dollars = list_unplus [c] * list_quantplus [c]
                 except:
-                    dollars = None
+                    dollars = 0
             list1.append (dollars)
             c = c + 1
         return list1
@@ -1591,65 +1547,90 @@ class Stock:
                 try:
                     dollars = list_unplus [c] * list_quantplus [c]
                 except:
+                    dollars = None
+            list1.append (dollars)
+            c = c + 1
+        return list1
+
+    def cfp2i_titles (self):
+        list1 = self.lineitem_cat_titles ('CF_P2I', 1)
+        return list1
+        
+    def cfp2i_spec (self):
+        list1 = self.lineitem_cat_spec ('CF_P2I', 1)
+        return list1
+    
+    def cfp2iplus (self):
+        list1 = self.lineitem_cat_total ('CF_P2I', 1)
+        return list1
+    
+    def cfp2iminus_titles (self):
+        list1 = self.lineitem_cat_titles ('CF_P2I', -1)
+        return list1
+        
+    def cfp2iminus_spec (self):
+        list1 = self.lineitem_cat_spec ('CF_P2I', -1)
+        return list1
+    
+    def cfp2iminus (self):
+        list1 = self.lineitem_cat_total ('CF_P2I', -1)
+        return list1
+        
+    # Gains classified as operating and not offset
+    # Positive operating cash flow reclassified as investing ($)
+    def dollars_cfp2i (self):
+        list_unplus  = self.unit_plus ()
+        list_unminus = self.unit_minus ()
+        list_quantplus = self.cfp2iplus ()
+        list_quantminus = self.cfp2iminus ()
+        list1 = []
+        n_cols = len (list_quantplus)
+        c_min = 0
+        c_max = n_cols - 1
+        c = c_min
+        while c <= c_max:
+            try:
+                dollars = list_unplus [c] * list_quantplus [c] - list_unminus [c] * list_quantminus [c]
+            except:
+                try:
+                    dollars = list_unplus [c] * list_quantplus [c]
+                except:
                     dollars = 0
             list1.append (dollars)
             c = c + 1
         return list1
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def exp_plus_titles (self):
-        list1 = self.lineitem_cat_titles ('exp', 1)
+    def cfn2i_titles (self):
+        list1 = self.lineitem_cat_titles ('CF_N2I', 1)
         return list1
         
-    def exp_plus_spec (self):
-        list1 = self.lineitem_cat_spec ('exp', 1)
+    def cfn2i_spec (self):
+        list1 = self.lineitem_cat_spec ('CF_N2I', 1)
         return list1
     
-    def exp_plus (self):
-        list1 = self.lineitem_cat_total ('exp', 1)
+    def cfn2iplus (self):
+        list1 = self.lineitem_cat_total ('CF_N2I', 1)
         return list1
     
-    def exp_minus_titles (self):
-        list1 = self.lineitem_cat_titles ('exp', -1)
+    def cfn2iminus_titles (self):
+        list1 = self.lineitem_cat_titles ('CF_N2I', -1)
         return list1
         
-    def exp_minus_spec (self):
-        list1 = self.lineitem_cat_spec ('exp', -1)
+    def cfn2iminus_spec (self):
+        list1 = self.lineitem_cat_spec ('CF_N2I', -1)
         return list1
     
-    def exp_minus (self):
-        list1 = self.lineitem_cat_total ('exp', -1)
+    def cfn2iminus (self):
+        list1 = self.lineitem_cat_total ('CF_N2I', -1)
         return list1
-
-    # Expenses ($)
-    def dollars_exp (self):
+        
+    # Losses classified as operating and not offset
+    # Negative operating cash flow reclassified as investing ($)
+    def dollars_cfn2i (self):
         list_unplus  = self.unit_plus ()
         list_unminus = self.unit_minus ()
-        list_quantplus = self.exp_plus ()
-        list_quantminus = self.exp_minus ()
+        list_quantplus = self.cfn2iplus ()
+        list_quantminus = self.cfn2iminus ()
         list1 = []
         n_cols = len (list_quantplus)
         c_min = 0
@@ -1662,41 +1643,42 @@ class Stock:
                 try:
                     dollars = list_unplus [c] * list_quantplus [c]
                 except:
-                    dollars = None
+                    dollars = 0
             list1.append (dollars)
             c = c + 1
         return list1
 
-    def cfadj_plus_titles (self):
-        list1 = self.lineitem_cat_titles ('adj', 1)
+    def cf2o_titles (self):
+        list1 = self.lineitem_cat_titles ('CF_2O', 1)
         return list1
         
-    def cfadj_plus_spec (self):
-        list1 = self.lineitem_cat_spec ('adj', 1)
+    def cf2o_spec (self):
+        list1 = self.lineitem_cat_spec ('CF_2O', 1)
         return list1
     
-    def cfadj_plus (self):
-        list1 = self.lineitem_cat_total ('adj', 1)
+    def cf2oplus (self):
+        list1 = self.lineitem_cat_total ('CF_2O', 1)
         return list1
     
-    def cfadj_minus_titles (self):
-        list1 = self.lineitem_cat_titles ('adj', -1)
+    def cf2ominus_titles (self):
+        list1 = self.lineitem_cat_titles ('CF_2O', -1)
         return list1
         
-    def cfadj_minus_spec (self):
-        list1 = self.lineitem_cat_spec ('adj', -1)
+    def cf2ominus_spec (self):
+        list1 = self.lineitem_cat_spec ('CF_2O', -1)
         return list1
     
-    def cfadj_minus (self):
-        list1 = self.lineitem_cat_total ('adj', -1)
+    def cf2ominus (self):
+        list1 = self.lineitem_cat_total ('CF_2O', -1)
         return list1
-
-    # Cash flow adjustments ($)
-    def dollars_cfadj (self):
+        
+    # Any investing or financing line items reclassified as operating ($)
+    # NOTE: usually not present
+    def dollars_cf2o (self):
         list_unplus  = self.unit_plus ()
         list_unminus = self.unit_minus ()
-        list_quantplus = self.cfadj_plus ()
-        list_quantminus = self.cfadj_minus ()
+        list_quantplus = self.cf2oplus ()
+        list_quantminus = self.cf2ominus ()
         list1 = []
         n_cols = len (list_quantplus)
         c_min = 0
@@ -1709,30 +1691,35 @@ class Stock:
                 try:
                     dollars = list_unplus [c] * list_quantplus [c]
                 except:
-                    dollars = None
+                    dollars = 0
             list1.append (dollars)
             c = c + 1
         return list1
 
     # Cash flow ($)
     def dollars_cf (self):
-        list1 = self.dollars_sales ()
-        list2 = self.dollars_exp ()
-        list3 = self.dollars_cfadj ()
-        list4 = []
-        n_cols = len (list1)
+        list1p = self.dollars_cfo ()
+        list2p = self.dollars_cftax ()
+        list3p = self.dollars_cfn2f ()
+        list1n = self.dollars_cfp2f ()
+        list2n = self.dollars_cfp2i ()
+        list4p = self.dollars_cfn2i ()
+        list5p = self.dollars_cf2o ()
+        list_output = []
+        n_cols = len (list1p)
         c_min = 0
         c_max = n_cols - 1
         c = c_min
         while c <= c_max:
+            dollars = 0
             try:
-                dollars = list1[c] - list2 [c] + list3 [c]
+                dollars = list1p[c] + list2p[c] + list3p[c] + list4p[c] + list5p[c] - list1n[c] - list2n[c]
             except:
                 dollars = None
-            list4.append (dollars)
+            list_output.append (dollars)
             c = c + 1
-        return list4
-
+        return list_output
+ 
     # Normalized capital spending ($)
     def dollars_cap (self):
         list1 = self.dollars_ppec ()
@@ -1888,7 +1875,7 @@ class Stock:
     
     def return_ppe_ave (self):
         list1 = self.return_ppe ()
-        n = n_ave
+        n = n_smooth
         list2 = moving_average (list1, n)
         return list2
         
@@ -2028,48 +2015,6 @@ class Stock:
         list2 = self.psh_select ()
         list3 = select_option_conv (list1, list2)
         return list3
-    
-    def psh_bargain_cdebt (self):
-        list1 = self.psh_netliq_cdebt ()
-        list2 = self.psh_ppec_cdebt ()
-        list3 = self.return_ppe ()
-        list4 = []
-        n_cols = len (list1)
-        c_min = 0
-        c_max = n_cols - 1
-        c = c_min
-        while c <= c_max:
-            try:
-                if c-1<0:
-                    psh = None
-                else:
-                    psh = list1[c-1] + (10/1.5) * list2[c-1] * list3 [c-1]
-            except:
-                psh = None
-            list4.append (psh)
-            c = c + 1
-        return list4
-
-    def psh_bargain_cshares (self):
-        list1 = self.psh_netliq_cshares ()
-        list2 = self.psh_ppec_cshares ()
-        list3 = self.return_ppe ()
-        list4 = []
-        n_cols = len (list1)
-        c_min = 0
-        c_max = n_cols - 1
-        c = c_min
-        while c <= c_max:
-            try:
-                if c-1<0:
-                    psh = None
-                else:
-                    psh = list1[c-1] + (10/1.5) * list2[c-1] * list3 [c-1]
-            except:
-                psh = None
-            list4.append (psh)
-            c = c + 1
-        return list4
 
     def doppler_book (self):
         list1 = self.psh_intrinsic ()
@@ -2105,9 +2050,13 @@ class Stock:
         yld = 1/pe
         return yld
 
+#########################################################
+# PART 10: DEFINE THE FUNCTIONS FOR DISPLAYING THE OUTPUT
+#########################################################
+
 # Displays the header row of an HTML table
-def row_header (str_symbol, int_n, float_price):
-    mystock = Stock (str_symbol, int_n, float_price)
+def row_header (str_symbol, str_path, str_name, float_price, int_n):
+    mystock = Stock (str_symbol, str_path, str_name, float_price, int_n)
     my_years = mystock.years ()
     list_year = my_years
     str_local = ''
@@ -2125,9 +2074,14 @@ def row_item (str_title, list_local):
     str_local = ''
     str_local += '\n<TR>'
     str_local += '<TD>' + str_title + '</TD>'
+    str_central = ''
     list_local.reverse ()
     for item in list_local:
-        str_local += '<TD>' + format (item, '.2f') + '</TD>'
+        try:
+            str_central += '<TD>' + format (item, '.2f') + '</TD>'
+        except:
+            str_central += '<TD>N/A</TD>'
+    str_local = str_local + str_central
     str_local += '\n</TR>'
     return str_local
 
@@ -2208,18 +2162,19 @@ def row_item_millions (str_title, list_local):
     str_local += '\n</TR>'
     return str_local
 
-def output_main (str_symbol, int_n, float_price):
-    mystock = Stock (str_symbol, int_n, float_price)
-    if not (os.path.exists(dir_output)):
-        os.mkdir (dir_output)
-    file_output = dir_output + '/' + str_symbol + '.html'
+def output_main (str_symbol, str_path, str_name, float_price, int_n):
+    mystock = Stock (str_symbol, str_path, str_name, float_price, int_n)
+    if not (os.path.exists(dir_output_stock)):
+        os.mkdir (dir_output_stock)
+    file_output = dir_output_stock + '/' + str_symbol + '.html'
     f = open(file_output, 'w')
-    f.write ('<HTML></BODY>\n')
+    f.write ('<HTML><BODY>\n')
     
-    f.write ('<H1>' + mystock.name () + '</H1>')
+    f.write ('<H1>' + str_name + '</H1>')
     now = datetime.datetime.now()
     f.write ('Date of Report: ' + now.strftime("%Y-%m-%d"))
     f.write ('\n<BR>Symbol: ' + str_symbol.upper())
+    f.write ('\n<BR>Name: ' + str_name)
     
     # TABLE OF VALUATION DATA
     my_pb = mystock.doppler_pb ()
@@ -2243,7 +2198,7 @@ def output_main (str_symbol, int_n, float_price):
     # TABLE OF PER-SHARE DATA
     f.write ('\n<H3>Per Share Values</H3>')
     f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, int_n, float_price))
+    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
     
     my_intrinsic = mystock.psh_intrinsic ()
     f.write (row_item_psh2 ('Intrinsic Value', my_intrinsic))
@@ -2269,7 +2224,7 @@ def output_main (str_symbol, int_n, float_price):
     
     f.write ('\n<H3>Performance</H3>')
     f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, int_n, float_price))
+    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
     
     f.write (row_item_percent ('Return<BR>on PPE', my_return_ppe))
     
@@ -2287,7 +2242,8 @@ def output_main (str_symbol, int_n, float_price):
     f.write ('\n<H3>Shares Outstanding</H3>')
     f.write ('\nNOTE: The split factor is in ones.  Everything else is in millions.')
     f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, int_n, float_price))
+    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
+    print mysplitf
     f.write (row_item ('Split<BR>Factor', mysplitf))
     f.write (row_item_millions ('Nominal<BR>Shares<BR>(nonconvertible)', myshares_nc))
     f.write (row_item_millions ('Nominal<BR>Shares<BR>(convertible)', myshares_conv))
@@ -2304,7 +2260,7 @@ def output_main (str_symbol, int_n, float_price):
     f.write ('\n<H3>Balance Sheet (in millions of dollars)</H3>')
     
     f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, int_n, float_price))
+    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
     f.write (row_item_millions ('Liquid Assets', myliquid))
     f.write (row_item_millions ('Liabilities -<BR>Nonconvertible', myliab))
     f.write (row_item_millions ('Liabilities -<BR>Convertible', myliabc))
@@ -2318,30 +2274,118 @@ def output_main (str_symbol, int_n, float_price):
     mycap = mystock.dollars_cap ()
     f.write ('\n<H3>Plant/Property/Equipment Capital (in millions of dollars)</H3>')
     f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, int_n, float_price))
+    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
     f.write (row_item_millions ('Plant/Property/Equipment<BR>Capital', myppec))
     f.write (row_item_millions ('Normalized<BR>Capital<BR>Spending', mycap))
     f.write ('\n</TABLE border=1>')
     
     # TABLE OF CASH FLOW DATA
-    mysales = mystock.dollars_sales ()
-    myexp = mystock.dollars_exp ()
-    mycfadj = mystock.dollars_cfadj ()
-    mycf = mystock.dollars_cf ()
-    mycap = mystock.dollars_cap ()
-    myfcf = mystock.dollars_fcf ()
+    my_cfo = mystock.dollars_cfo ()
+    my_cftax = mystock.dollars_cftax ()
+    my_cfn2f = mystock.dollars_cfn2f ()
+    my_cfp2f = mystock.dollars_cfp2f ()
+    my_cfp2i = mystock.dollars_cfp2i ()
+    my_cfn2i = mystock.dollars_cfn2i ()
+    my_cf2o = mystock.dollars_cf2o ()
+    my_cf = mystock.dollars_cf ()
+    my_cap = mystock.dollars_cap ()
+    my_fcf = mystock.dollars_fcf ()
+
     f.write ('\n<H3>Cash Flow Data (in millions of dollars)</H3>')
     f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, int_n, float_price))
-    f.write (row_item_millions ('Net Revenue', mysales))
-    f.write (row_item_millions ('Expenses', myexp))
-    f.write (row_item_millions ('Non-Cash<BR>Adjustments', mycfadj))
-    f.write (row_item_millions ('Cash Flow', mycf))
-    f.write (row_item_millions ('Normalized<BR>Capital<BR>Spending', mycap))
-    f.write (row_item_millions ('Free Cash Flow', myfcf))
+    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
+    f.write (row_item_millions ('Official<BR>Cash<BR>Flow', my_cfo))
+    f.write (row_item_millions ('Income<BR>Tax', my_cftax))
+    f.write (row_item_millions ('Costs<BR>(to F)', my_cfn2f))
+    f.write (row_item_millions ('Losses<BR>(to I)', my_cfn2i))
+    f.write (row_item_millions ('Income<BR>(to F)', my_cfp2f))
+    f.write (row_item_millions ('Gains<BR>(to I)', my_cfp2i))
+    f.write (row_item_millions ('I/F to O', my_cf2o))
+    f.write (row_item_millions ('Pre-tax<BR>Cash<BR>Flow', my_cf))
+    f.write (row_item_millions ('Normalized<BR>Capital<BR>Spending', my_cap))
+    f.write (row_item_millions ('Doppler<BR>Earnings', my_fcf))
     f.write ('\n</TABLE>')
     f.write ('\n</BODY></HTML>')
     f.close()
+
+
+i = 0
+i_max = len (list_symbol_found) - 1
+while i <= i_max:
+    symbol = list_symbol_found [i]
+    path = list_path_found [i]
+    name = list_name_found [i]
+    price = list_price_found [i]
+    n_smooth = 4
+    #Stock_this = Stock (symbol, path, name, price, n_smooth)
+    output_main (symbol, path, name, price, n_smooth)
+    i = i + 1
+
+
+sys.exit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+
+
+#######################################################################
+# PART 4: DEFINE THE CLASS STOCK (symbol, n_smooth, price)
+# n_smooth: number of years to average when calculating the Doppler ROE
+#######################################################################
+
+
+# This defines the class Stock (symbol)
+# Input: stock symbol
+# Outputs: 2-D data list fed by the input file and 1-D data lists
+class Stock:
+    def __init__ (self, symbol, n_smooth, price):
+        self.symbol = symbol
+        self.n_smooth = n_smooth
+        self.price = price
+    
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
 
 stock_symbol = "fast"
 n_ave = 1
@@ -2392,3 +2436,4 @@ print mystock.dollars_cfn2f()
 print "\ndollars_cfp2f\n"
 print mystock.dollars_cfp2f()
 
+"""

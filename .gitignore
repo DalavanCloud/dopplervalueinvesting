@@ -1,6 +1,7 @@
 *.csv#
+*.ods#
 screen-downloads/*
-screen-output/*
+screen-output/*.html
 screen-input/companylist-amex.csv
 screen-input/companylist-nasdaq.csv
 screen-input/companylist-nyse.csv
