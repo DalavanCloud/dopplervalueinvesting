@@ -1,5 +1,9 @@
 This is the directory for the input financial data.
 
+For each stock, the input file is originally created in LibreOffice and saved as a *.ods version and *.csv version.
+Data is entered in the *.ods file, which has more readable formatting.  
+The *.csv file is for the script to process.
+
 The format of the input financial data files:
 *  Column 1: name of the line items
 *  Column 2: the specific category that the line item of Column 1 fits under

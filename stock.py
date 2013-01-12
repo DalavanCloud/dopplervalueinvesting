@@ -1918,7 +1918,7 @@ class Stock:
             list3.append (psh)
             c = c + 1
         return list3
-    
+
     def psh_fcf_smooth_2d (self):
         list1 = self.psh_fcf_smooth_cdebt ()
         list2 = self.psh_fcf_smooth_cshares ()
@@ -1926,9 +1926,59 @@ class Stock:
         list3.append (list1)
         list3.append (list2)
         return list3
+
+    
+    def psh_fcf_proj_cdebt (self):
+        list1 = self.return_ppe_ave ()
+        list2 = self.psh_ppec_cdebt ()
+        list3 = []
+        n_cols = len (list1)
+        c_min = 0
+        c_max = n_cols - 1
+        c = c_min
+        while c <= c_max:
+            try:
+                if c-1<0:
+                    psh = None
+                else:
+                    psh = list1[c-1] * list2[c-1]
+            except:
+                psh = None
+            list3.append (psh)
+            c = c + 1
+        return list3
+        
+    def psh_fcf_proj_cshares (self):
+        list1 = self.return_ppe_ave ()
+        list2 = self.psh_ppec_cshares ()
+        list3 = []
+        n_cols = len (list1)
+        c_min = 0
+        c_max = n_cols - 1
+        c = c_min
+        while c <= c_max:
+            try:
+                if c-1<0:
+                    psh = None
+                else:
+                    psh = list1[c-1] * list2[c-1]
+            except:
+                psh = None
+            list3.append (psh)
+            c = c + 1
+        return list3
+
+    def psh_fcf_proj_2d (self):
+        list1 = self.psh_fcf_proj_cdebt ()
+        list2 = self.psh_fcf_proj_cshares ()
+        list3 = []
+        list3.append (list1)
+        list3.append (list2)
+        return list3
+
         
     def psh_fcf (self):
-        list1 = self.psh_fcf_smooth_2d ()
+        list1 = self.psh_fcf_proj_2d ()
         list2 = self.psh_select ()
         list3 = select_option_conv (list1, list2)
         return list3
@@ -2016,9 +2066,16 @@ class Stock:
         list3 = select_option_conv (list1, list2)
         return list3
 
+    def doppler_earnings (self):
+        list1 = self.psh_ppec ()
+        list2 = self.return_ppe_ave ()
+        fcf = list1 [-1] * list2 [-1]
+        return fcf
+
     def doppler_book (self):
-        list1 = self.psh_intrinsic ()
-        bv = list1 [-1]
+        doppler_earnings_local = self.doppler_earnings ()
+        list1 = self.psh_netliq ()
+        bv = 10 * doppler_earnings_local + list1 [-1]
         return bv
     
     def doppler_pb (self):
@@ -2033,12 +2090,7 @@ class Stock:
         netliq = list1 [-1]
         price_adj = p - netliq
         return price_adj
-        
-    def doppler_earnings (self):
-        list1 = self.psh_fcf ()
-        fcf = list1 [-1]
-        return fcf
-    
+            
     def doppler_pe (self):
         p_adj = self.doppler_price_adj ()
         fcf = self.doppler_earnings ()
@@ -2207,14 +2259,14 @@ def output_main (str_symbol, str_path, str_name, float_price, int_n):
     f.write (row_item_psh2 ('Net Liquidity', my_netliq))
     
     my_fcf = mystock.psh_fcf ()
-    f.write (row_item_psh3 ('Smoothed Free Cash Flow', my_fcf))
+    f.write (row_item_psh3 ('Projected Free Cash Flow', my_fcf))
     # my_fcf_cdebt = mystock.psh_fcf_smooth_cdebt ()
     # f.write (row_item_psh3 ('Smoothed<BR>Free Cash Flow<BR>(No Conversions)', my_fcf_cdebt))
     # my_fcf_cshares = mystock.psh_fcf_smooth_cshares ()
     # f.write (row_item_psh3 ('Smoothed<BR>Free Cash Flow<BR>(With Conversions)', my_fcf_cshares))
     
     my_psh_ppec = mystock.psh_ppec ()
-    f.write (row_item_psh2 ('Plant/Property/Equipment', my_psh_ppec))
+    f.write (row_item_psh3 ('Plant/Property/Equipment', my_psh_ppec))
     
     f.write ('\n</TABLE border>')
     
@@ -2243,7 +2295,6 @@ def output_main (str_symbol, str_path, str_name, float_price, int_n):
     f.write ('\nNOTE: The split factor is in ones.  Everything else is in millions.')
     f.write ('\n<TABLE border=1>')
     f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
-    print mysplitf
     f.write (row_item ('Split<BR>Factor', mysplitf))
     f.write (row_item_millions ('Nominal<BR>Shares<BR>(nonconvertible)', myshares_nc))
     f.write (row_item_millions ('Nominal<BR>Shares<BR>(convertible)', myshares_conv))
@@ -2321,119 +2372,3 @@ while i <= i_max:
     output_main (symbol, path, name, price, n_smooth)
     i = i + 1
 
-
-sys.exit()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-
-
-#######################################################################
-# PART 4: DEFINE THE CLASS STOCK (symbol, n_smooth, price)
-# n_smooth: number of years to average when calculating the Doppler ROE
-#######################################################################
-
-
-# This defines the class Stock (symbol)
-# Input: stock symbol
-# Outputs: 2-D data list fed by the input file and 1-D data lists
-class Stock:
-    def __init__ (self, symbol, n_smooth, price):
-        self.symbol = symbol
-        self.n_smooth = n_smooth
-        self.price = price
-    
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-stock_symbol = "fast"
-n_ave = 1
-price = 30
-# stock_symbol = raw_input ('Enter the stock symbol of the company to analyze:\n')
-# stock_symbol = stock_symbol.lower()
-# n_ave = int (raw_input ('Enter the number of years of data to use for smoothing:\n'))
-# price = float (raw_input ('Enter the current stock price:\n'))
-mystock = Stock (stock_symbol, n_ave, price)
-
-# output_main (stock_symbol, n_ave, price)
-print "\ndollars_liq\n"
-print mystock.dollars_liq()
-print "\nasset\n"
-print mystock.asset()
-print "\nequity\n"
-print mystock.equity()
-print "\ndollars_liab_cshares\n"
-print mystock.dollars_liab_cshares ()
-print "\ndollars_liab_conv\n"
-print mystock.dollars_liab_conv ()
-print "\ndollars_netliq_cdebt\n"
-print mystock.dollars_netliq_cdebt()
-print "\ndollars_netliq_cshares\n"
-print mystock.dollars_netliq_cshares()
-
-print "\nmystock.dollars_ppec\n"
-print mystock.dollars_ppec ()
-
-
-
-print "\ncfoplus\n"
-print mystock.cfoplus ()
-
-print "\ndollars_cfo\n"
-print mystock.dollars_cfo()
-
-print "\ndollars_cftax\n"
-print mystock.dollars_cftax()
-
-print "\ncf2fplus\n"
-print mystock.cfn2fplus ()
-
-
-print "\ndollars_cfn2f\n"
-print mystock.dollars_cfn2f()
-
-print "\ndollars_cfp2f\n"
-print mystock.dollars_cfp2f()
-
-"""
