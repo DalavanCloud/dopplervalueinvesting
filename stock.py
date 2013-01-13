@@ -508,6 +508,7 @@ list_symbol_found = []
 list_path_found = []
 list_name_found = []
 list_price_found = []
+list_nshares_found = []
 while i <= i_max:
     path = list_path_selected [i]
     symbol = list_symbol_selected [i]
@@ -515,10 +516,12 @@ while i <= i_max:
     if i_symbol <> None:
         name = list_name [i_symbol]
         price = list_price [i_symbol]
+        nshares = list_nshares [i_symbol]
         list_symbol_found.append (symbol)
         list_path_found.append (path)
         list_name_found.append (name)
         list_price_found.append (price)
+        list_nshares_found.append (nshares)
     i = i + 1
 
 ##########################
@@ -704,11 +707,12 @@ class CSVfile:
 # Input: stock symbol
 # Outputs: 2-D data list fed by the input file and 1-D data lists
 class Stock:
-    def __init__ (self, symbol, path, name, price, n_smooth):
+    def __init__ (self, symbol, path, name, price, nshares, n_smooth):
         self.symbol = symbol
         self.path = path
         self.name = name
         self.price = price
+        self.nshares = nshares
         self.n_smooth = n_smooth
     
     # Purpose: reads the contents of the financial data file into a 2-D list
@@ -1314,6 +1318,20 @@ class Stock:
         list3 = []
         list3.append (list1)
         list3.append (list2)
+        return list3
+
+    def shares_2d (self):
+        list1 = self.shares_adj_cdebt ()
+        list2 = self.shares_adj_cshares ()
+        list3 = []
+        list3.append (list1)
+        list3.append (list2)
+        return list3
+
+    def shares_final (self):
+        list1 = self.shares_2d ()
+        list2 = self.psh_select ()
+        list3 = select_option_conv (list1, list2)
         return list3
 		
     def ppecplus_titles (self):
@@ -2052,8 +2070,8 @@ class Stock:
                 element = None
             list2.append (element)
             c = c + 1
-        return list2
-    
+        return list2     
+
     def psh_intrinsic (self):
         list1 = self.psh_intrinsic_2d ()
         list2 = self.psh_select ()
@@ -2065,6 +2083,14 @@ class Stock:
         list2 = self.psh_select ()
         list3 = select_option_conv (list1, list2)
         return list3
+
+    def psh_netliq_current (self):
+        list1 = self.psh_netliq ()
+        return list1 [-1]
+
+    def shares_current (self):
+        list1 = self.shares_final ()
+        return list1 [-1]
 
     def doppler_earnings (self):
         list1 = self.psh_ppec ()
@@ -2107,8 +2133,8 @@ class Stock:
 #########################################################
 
 # Displays the header row of an HTML table
-def row_header (str_symbol, str_path, str_name, float_price, int_n):
-    mystock = Stock (str_symbol, str_path, str_name, float_price, int_n)
+def row_header (str_symbol, str_path, str_name, float_price, float_nshares, int_n):
+    mystock = Stock (str_symbol, str_path, str_name, float_price, float_nshares, int_n)
     my_years = mystock.years ()
     list_year = my_years
     str_local = ''
@@ -2214,19 +2240,41 @@ def row_item_millions (str_title, list_local):
     str_local += '\n</TR>'
     return str_local
 
-def output_main (str_symbol, str_path, str_name, float_price, int_n):
-    mystock = Stock (str_symbol, str_path, str_name, float_price, int_n)
+# Purpose: Determine the dB value of a positive number
+# Input: number
+# Output: number
+def db (num_input):
+    num_output = 0
+    try:
+        num_output = 10 * math.log10 (num_input)
+    except:
+        num_output = None
+    return num_output
+
+def output_main (str_symbol, str_path, str_name, float_price, float_nshares, int_n):
+    mystock = Stock (str_symbol, str_path, str_name, float_price, nshares, int_n)
     if not (os.path.exists(dir_output_stock)):
         os.mkdir (dir_output_stock)
     file_output = dir_output_stock + '/' + str_symbol + '.html'
     f = open(file_output, 'w')
-    f.write ('<HTML><BODY>\n')
+    f.write ('<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">')
+    f.write ('\n<html>')
+    f.write ('\n<head>')
+    f.write ('\n<meta name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">')
+    f.write ('\n<title>In-Depth Quantitative Analysis - ' + str_name + '</title>')
+    f.write ('\n</head>')
+    f.write ('\n<body>')
     
     f.write ('<H1>' + str_name + '</H1>')
     now = datetime.datetime.now()
-    f.write ('Date of Report: ' + now.strftime("%Y-%m-%d"))
-    f.write ('\n<BR>Symbol: ' + str_symbol.upper())
-    f.write ('\n<BR>Name: ' + str_name)
+    f.write ('\n<TABLE border="0"><tr>')
+    f.write ('\n<td>Date of Report: ' + now.strftime("%Y-%m-%d") + '</td>')
+    f.write ('\n<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>')
+    f.write ('\n<td>Symbol: ' + str_symbol.upper() + '</td>')
+    f.write ('\n<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>')
+    f.write ('\n</tr></TABLE>')
+    
+    # BEGIN: TABLE OF VALUATION DATA
     
     # TABLE OF VALUATION DATA
     my_pb = mystock.doppler_pb ()
@@ -2235,22 +2283,68 @@ def output_main (str_symbol, str_path, str_name, float_price, int_n):
     my_bv = mystock.doppler_book ()
     my_price_adj = mystock.doppler_price_adj ()
     my_fcf = mystock.doppler_earnings ()
+    my_netliq = mystock.psh_netliq_current ()
     
     f.write ('\n<H3>Current Valuation Data</H3>')
-    f.write ('\n<TABLE border=1>')
-    f.write ('\n<TR><TD>Recent Stock Price</TD><TD>${0:.2f} per share</TD></TR>'.format (float_price))
-    f.write ('\n<TR><TD>Doppler Price/Book Ratio</TD><TD>{0:.2f}</TD></TR>'.format (my_pb))
-    f.write ('\n<TR><TD>Doppler PE Ratio</TD><TD>{0:.1f}</TD></TR>'.format (my_pe))
-    f.write ('\n<TR><TD>Doppler Earnings Yield</TD><TD>{0:.2f}%</TD></TR>'.format (my_eyld))
-    f.write ('\n<TR><TD>Doppler Book Value</TD><TD>${0:.2f} per share</TD></TR>'.format (my_bv))
-    f.write ('\n<TR><TD>Price (Adjusted for Net Liquidity)</TD><TD>${0:.2f} per share</TD></TR>'.format (my_price_adj))
-    f.write ('\n<TR><TD>Doppler Earnings</TD><TD>${0:.3f} per share</TD></TR>'.format (my_fcf))
-    f.write ('\n</TABLE border>') 
+    f.write ('\n<TABLE border="0" cellpadding=10>')
+    f.write ('\n\t<tr>')
+    f.write ('\n\t\t<td>')
+
+    f.write ('\n\t\t<TABLE border="1">')
+    f.write ('\n\t\t<TR><TD>Recent Stock Price</TD><TD>${0:.2f} per share</TD></TR>'.format (float_price))
+    f.write ('\n\t\t<TR><TD>Doppler Price/Book Ratio</TD><TD>{0:.2f}</TD></TR>'.format (my_pb))
+    f.write ('\n\t\t<TR><TD>Doppler PE Ratio</TD><TD>{0:.1f}</TD></TR>'.format (my_pe))
+    f.write ('\n\t\t<TR><TD>Doppler Earnings Yield</TD><TD>{0:.2f}%</TD></TR>'.format (my_eyld))
+    f.write ('\n\t\t</TABLE>') 
+
+    f.write ('\n\t\t</td>')
+    f.write ('\n\t\t<td>')  
+
+    f.write ('\n\t\t<TABLE border="1">')
+    f.write ('\n\t\t<TR><TD>Doppler Earnings</TD><TD>${0:.3f} per share</TD></TR>'.format (my_fcf))
+    f.write ('\n\t\t<TR><TD>Net Liquidity</TD><TD>${0:.2f} per share</TD></TR>'.format (my_netliq))
+    f.write ('\n\t\t<TR><TD>Price (Adjusted for Net Liquidity)</TD>')
+    f.write ('<TD>${0:.2f} per share</TD></TR>'.format (my_price_adj))
+    f.write ('\n\t\t<TR><TD>Doppler Book Value</TD><TD>${0:.2f} per share</TD></TR>'.format (my_bv))
+    f.write ('\n\t\t</TABLE>') 
+
+    f.write ('\n\t\t</td>')
+    f.write ('\n\t</tr>')
+    f.write ('\n</TABLE>')  
+    
+    # TABLE OF SHARES OUTSTANDING
+    my_shares_doppler = mystock.shares_current ()
+    shares_diff_db = db (my_shares_doppler/nshares)
+    f.write ('\n<H3>Number of Shares Outstanding</H3>')
+    f.write ('\n<TABLE border=0 cellpadding=10>')
+    f.write ('\n\t<tr>')
+
+    f.write ('\n\t\t<td>')
+    f.write ('\n\t\t<TABLE border="1">')
+    f.write ('\n\t<TR><TD>Difference:  {0:.2f} dB</TD></TR>'.format(shares_diff_db))
+    f.write ('\n\t\t</TABLE>') 
+    f.write ('\n\t\t</td>')
+
+    f.write ('\n\t\t<td>')
+    f.write ('\n\t\t<TABLE border="1">')
+    f.write ('\n\t<TR><TD>Doppler: ' + str(millions(my_shares_doppler)) +  ' million</TD></TR>')
+    f.write ('\n\t\t</TABLE>') 
+    f.write ('\n\t\t</td>')
+
+    f.write ('\n\t\t<td>')
+    f.write ('\n\t\t<TABLE border="1">')
+    f.write ('\n\t<TR><TD>Official: ' + str(millions(nshares)) +  ' million</TD></TR>')
+    f.write ('\n\t\t</TABLE>') 
+    f.write ('\n\t\t</td>')
+
+    f.write ('\n\t</tr>')
+    f.write ('\n</TABLE>')
+    # END: SHARES OUTSTANDING
     
     # TABLE OF PER-SHARE DATA
     f.write ('\n<H3>Per Share Values</H3>')
     f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
+    f.write (row_header(str_symbol, str_path, str_name, float_price, float_nshares, int_n))
     
     my_intrinsic = mystock.psh_intrinsic ()
     f.write (row_item_psh2 ('Intrinsic Value', my_intrinsic))
@@ -2260,23 +2354,19 @@ def output_main (str_symbol, str_path, str_name, float_price, int_n):
     
     my_fcf = mystock.psh_fcf ()
     f.write (row_item_psh3 ('Projected Free Cash Flow', my_fcf))
-    # my_fcf_cdebt = mystock.psh_fcf_smooth_cdebt ()
-    # f.write (row_item_psh3 ('Smoothed<BR>Free Cash Flow<BR>(No Conversions)', my_fcf_cdebt))
-    # my_fcf_cshares = mystock.psh_fcf_smooth_cshares ()
-    # f.write (row_item_psh3 ('Smoothed<BR>Free Cash Flow<BR>(With Conversions)', my_fcf_cshares))
     
     my_psh_ppec = mystock.psh_ppec ()
     f.write (row_item_psh3 ('Plant/Property/Equipment', my_psh_ppec))
     
-    f.write ('\n</TABLE border>')
+    f.write ('\n</TABLE>')
     
     # TABLE OF PERFORMANCE DATA
     my_return_ppe = mystock.return_ppe ()
     my_return_ppe_ave = mystock.return_ppe_ave ()
     
     f.write ('\n<H3>Performance</H3>')
-    f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
+    f.write ('\n<TABLE border="1">')
+    f.write (row_header(str_symbol, str_path, str_name, float_price, float_nshares, int_n))
     
     f.write (row_item_percent ('Return<BR>on PPE', my_return_ppe))
     
@@ -2293,8 +2383,8 @@ def output_main (str_symbol, str_path, str_name, float_price, int_n):
     
     f.write ('\n<H3>Shares Outstanding</H3>')
     f.write ('\nNOTE: The split factor is in ones.  Everything else is in millions.')
-    f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
+    f.write ('\n<TABLE border="1">')
+    f.write (row_header(str_symbol, str_path, str_name, float_price, float_nshares, int_n))
     f.write (row_item ('Split<BR>Factor', mysplitf))
     f.write (row_item_millions ('Nominal<BR>Shares<BR>(nonconvertible)', myshares_nc))
     f.write (row_item_millions ('Nominal<BR>Shares<BR>(convertible)', myshares_conv))
@@ -2311,24 +2401,24 @@ def output_main (str_symbol, str_path, str_name, float_price, int_n):
     f.write ('\n<H3>Balance Sheet (in millions of dollars)</H3>')
     
     f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
+    f.write (row_header(str_symbol, str_path, str_name, float_price, float_nshares, int_n))
     f.write (row_item_millions ('Liquid Assets', myliquid))
     f.write (row_item_millions ('Liabilities -<BR>Nonconvertible', myliab))
     f.write (row_item_millions ('Liabilities -<BR>Convertible', myliabc))
     f.write (row_item_millions ('Net Liquid Assets -<BR>No Conversions', mynetliqnc))
     f.write (row_item_millions ('Net Liquid Assets -<BR>With Conversions', mynetliqconv))
     
-    f.write ('\n</TABLE border=1>')
+    f.write ('\n</TABLE>')
     
     # TABLE OF PLANT/PROPERTY/EQUIPMENT DATA
     myppec = mystock.dollars_ppec ()
     mycap = mystock.dollars_cap ()
     f.write ('\n<H3>Plant/Property/Equipment Capital (in millions of dollars)</H3>')
     f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
+    f.write (row_header(str_symbol, str_path, str_name, float_price, float_nshares, int_n))
     f.write (row_item_millions ('Plant/Property/Equipment<BR>Capital', myppec))
     f.write (row_item_millions ('Normalized<BR>Capital<BR>Spending', mycap))
-    f.write ('\n</TABLE border=1>')
+    f.write ('\n</TABLE>')
     
     # TABLE OF CASH FLOW DATA
     my_cfo = mystock.dollars_cfo ()
@@ -2344,7 +2434,7 @@ def output_main (str_symbol, str_path, str_name, float_price, int_n):
 
     f.write ('\n<H3>Cash Flow Data (in millions of dollars)</H3>')
     f.write ('\n<TABLE border=1>')
-    f.write (row_header(str_symbol, str_path, str_name, float_price, int_n))
+    f.write (row_header(str_symbol, str_path, str_name, float_price, float_nshares, int_n))
     f.write (row_item_millions ('Official<BR>Cash<BR>Flow', my_cfo))
     f.write (row_item_millions ('Income<BR>Tax', my_cftax))
     f.write (row_item_millions ('Costs<BR>(to F)', my_cfn2f))
@@ -2356,7 +2446,8 @@ def output_main (str_symbol, str_path, str_name, float_price, int_n):
     f.write (row_item_millions ('Normalized<BR>Capital<BR>Spending', my_cap))
     f.write (row_item_millions ('Doppler<BR>Earnings', my_fcf))
     f.write ('\n</TABLE>')
-    f.write ('\n</BODY></HTML>')
+    
+    f.write ('\n</body>\n</html>')
     f.close()
 
 
@@ -2367,8 +2458,9 @@ while i <= i_max:
     path = list_path_found [i]
     name = list_name_found [i]
     price = list_price_found [i]
+    nshares = list_nshares_found [i]
     n_smooth = 4
-    #Stock_this = Stock (symbol, path, name, price, n_smooth)
-    output_main (symbol, path, name, price, n_smooth)
+    print "Analyzing " + name + " (" + symbol + ")"
+    output_main (symbol, path, name, price, nshares, n_smooth)
     i = i + 1
 
