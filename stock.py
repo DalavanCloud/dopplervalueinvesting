@@ -2450,7 +2450,9 @@ def output_main (str_symbol, str_path, str_name, float_price, float_nshares, int
     f.write ('\n</body>\n</html>')
     f.close()
 
-
+#######################################
+# PART 11: PRINT RESULTS FOR EACH STOCK
+#######################################
 i = 0
 i_max = len (list_symbol_found) - 1
 while i <= i_max:
