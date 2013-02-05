@@ -2464,3 +2464,13 @@ while i <= i_max:
     output_main (symbol, path, name, price, nshares, n_smooth)
     i = i + 1
 
+#######################################################################################
+# PART 12: COPY THE RESULTS OF THE DETAILED NUMERICAL STOCK ANALYSIS TO THE DRUPAL SITE
+#######################################################################################
+# dir_home = '/home/doppler' # Home directory on server
+# dir_output = dir_screen + '/stock-output' 
+src = dir_output + '/*'
+dest = dir_home + '/webapps/drup/sites/default/files/stock-results'
+if (is_server):
+    print "Copying results of the detailed numerical analysis to the Drupal web site"
+    os.system ('cp ' + src + ' ' + dest)
