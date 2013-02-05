@@ -2495,3 +2495,43 @@ dest = dir_home + '/webapps/drup/sites/default/files/stock-input'
 if (is_server):
     print "Copying input data files to the Drupal web site"
     os.system ('cp ' + src + ' ' + dest)
+
+############################
+# PART 14: CREATE INDEX PAGE
+############################
+file_output = dir_output_stock + '/index.html'
+f1 = open(file_output, 'w')
+f1.write ('<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">')
+f1.write ('\n<html>')
+f1.write ('\n<head>')
+f1.write ('\n<meta name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">')
+f1.write ('\n<title>In-Depth Quantitative Analysis - Index</title>')
+f1.write ('\n</head>')
+f1.write ('\n<body>')
+f1.write ('\n<h1>In-Depth Quantitative Analysis - Index Page</h1>')
+f1.write ('\nPLEASE NOTE: The output of the in-depth quantitative analysis is generated automatically, but ')
+f1.write ('\nthe input data is entered MANUALLY.')
+i = 0
+i_max = len (list_symbol_found) - 1
+while i <= i_max:
+    symbol = list_symbol_found [i]
+    name = list_name_found [i]
+    price = list_price_found [i]
+    f1.write ('\n<h3>' + name + ' (' + symbol + ')</H3>')
+    f1.write ('\n<ul>')
+    f1.write ('\n<li>')
+    f1.write ('<a href="' + '/sites/default/files/stock-input/' + symbol + '.csv">Input (csv)</a>')
+    f1.write ('</li>')
+    f1.write ('\n<li>')
+    f1.write ('<a href="' + '/sites/default/files/stock-input/' + symbol + '.ods">Input (ods)</a>')
+    f1.write ('</li>')
+    f1.write ('\n<li>')
+    f1.write ('<a href="' + '/sites/default/files/stock-results/' + symbol + '.html">Output</a>')
+    f1.write ('</li>')
+
+    f1.write ('\n</ul>')
+
+    i = i + 1
+
+f1.write ('\n</body>\n</html>')
+f1.close()
