@@ -2466,38 +2466,8 @@ while i <= i_max:
     output_main (symbol, path, name, price, nshares, n_smooth)
     i = i + 1
 
-#######################################################################################
-# PART 12: COPY THE RESULTS OF THE DETAILED NUMERICAL STOCK ANALYSIS TO THE DRUPAL SITE
-#######################################################################################
-# dir_home = '/home/doppler' # Home directory on server
-# dir_main = dir_home + '/webapps/scripts_doppler/dopplervalueinvesting'
-# dir_input_screen = dir_main + '/screen-input'
-# dir_input_stock = dir_main + '/stock-input'
-# dir_output_stock = dir_main + '/stock-output'  
-
-src = dir_output_stock + '/*'
-dest = dir_home + '/webapps/drup/sites/default/files/stock-results'
-if (is_server):
-    print "Copying results of the detailed numerical analysis to the Drupal web site"
-    os.system ('cp ' + src + ' ' + dest)
-
-#############################################
-# PART 13: COPY INPUT DATA TO THE DRUPAL SITE
-#############################################
-# dir_home = '/home/doppler' # Home directory on server
-# dir_main = dir_home + '/webapps/scripts_doppler/dopplervalueinvesting'
-# dir_input_screen = dir_main + '/screen-input'
-# dir_input_stock = dir_main + '/stock-input'
-# dir_output_stock = dir_main + '/stock-output'  
-
-src = dir_input_stock + '/*'
-dest = dir_home + '/webapps/drup/sites/default/files/stock-input'
-if (is_server):
-    print "Copying input data files to the Drupal web site"
-    os.system ('cp ' + src + ' ' + dest)
-
 ############################
-# PART 14: CREATE INDEX PAGE
+# PART 12: CREATE INDEX PAGE
 ############################
 file_output = dir_output_stock + '/index.html'
 f1 = open(file_output, 'w')
@@ -2535,3 +2505,35 @@ while i <= i_max:
 
 f1.write ('\n</body>\n</html>')
 f1.close()
+
+#######################################################################################
+# PART 13: COPY THE RESULTS OF THE DETAILED NUMERICAL STOCK ANALYSIS TO THE DRUPAL SITE
+#######################################################################################
+# dir_home = '/home/doppler' # Home directory on server
+# dir_main = dir_home + '/webapps/scripts_doppler/dopplervalueinvesting'
+# dir_input_screen = dir_main + '/screen-input'
+# dir_input_stock = dir_main + '/stock-input'
+# dir_output_stock = dir_main + '/stock-output'  
+
+src = dir_output_stock + '/*'
+dest = dir_home + '/webapps/drup/sites/default/files/stock-results'
+if (is_server):
+    print "Copying results of the detailed numerical analysis to the Drupal web site"
+    os.system ('cp ' + src + ' ' + dest)
+
+#############################################
+# PART 14: COPY INPUT DATA TO THE DRUPAL SITE
+#############################################
+# dir_home = '/home/doppler' # Home directory on server
+# dir_main = dir_home + '/webapps/scripts_doppler/dopplervalueinvesting'
+# dir_input_screen = dir_main + '/screen-input'
+# dir_input_stock = dir_main + '/stock-input'
+# dir_output_stock = dir_main + '/stock-output'  
+
+src = dir_input_stock + '/*'
+dest = dir_home + '/webapps/drup/sites/default/files/stock-input'
+if (is_server):
+    print "Copying input data files to the Drupal web site"
+    os.system ('cp ' + src + ' ' + dest)
+
+
