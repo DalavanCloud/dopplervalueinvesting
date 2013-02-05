@@ -2468,8 +2468,12 @@ while i <= i_max:
 # PART 12: COPY THE RESULTS OF THE DETAILED NUMERICAL STOCK ANALYSIS TO THE DRUPAL SITE
 #######################################################################################
 # dir_home = '/home/doppler' # Home directory on server
-# dir_output = dir_screen + '/stock-output' 
-src = dir_output + '/*'
+# dir_main = dir_home + '/webapps/scripts_doppler/dopplervalueinvesting'
+# dir_input_screen = dir_main + '/screen-input'
+# dir_input_stock = dir_main + '/stock-input'
+# dir_output_stock = dir_main + '/stock-output'  
+
+src = dir_output_stock + '/*'
 dest = dir_home + '/webapps/drup/sites/default/files/stock-results'
 if (is_server):
     print "Copying results of the detailed numerical analysis to the Drupal web site"
